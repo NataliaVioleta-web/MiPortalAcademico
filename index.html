@@ -110,60 +110,55 @@
             subtituloSemana.innerText = `Semana del ${lunes.getDate()}/${lunes.getMonth()+1} al ${viernes.getDate()}/${viernes.getMonth()+1}`;
         }
 
-               // REEMPLAZA ESTA FUNCIÓN EN LA PARTE 3 DE TU CÓDIGO HTML
-        async function fetchGoogleSheets() {
-            const contHorario = document.getElementById('horario');
-            const contTurnos = document.getElementById('turnos-contenedor');
-            const contPruebas = document.getElementById('pruebas-contenedor');
-            try {
-                // Actualiza aquí tu URL si cambió al generar la nueva versión
-                const respuesta = await fetch(URL_SCRIPT);
-                if (!respuesta.ok) throw new Error("Error de respuesta");
-                
-                const datos = await respuesta.json();
-                
-                // Mapeo adaptado a las propiedades de tus hojas
-                if (datos.horario) contHorario.innerHTML = generarBloquesHtml(datos.horario);
-                if (datos.turnos) contTurnos.innerHTML = generarBloquesHtml(datos.turnos);
-                if (datos.pruebas) contPruebas.innerHTML = generarBloquesHtml(datos.pruebas);
-                
-            } catch (error) {
-                console.error("Fallo al conectar:", error);
-                const txtError = `<div class="msg" style="color: #e74c3c;">No se pudieron sincronizar los datos de Google Sheets.</div>`;
-                if(contHorario) contHorario.innerHTML = txtError;
-                if(contTurnos) contTurnos.innerHTML = txtError;
-                if(contPruebas) contPruebas.innerHTML = txtError;
-            }
-
         function generarBloquesHtml(lista) {
             if (!lista || lista.length === 0) return '<div class="msg">No hay registros disponibles.</div>';
+            
             let html = '';
-            let ultimoDia = '';
-            lista.forEach(item => {
-                let dia = item.dia || item.Dia || item.fecha || '';
-                let titulo = item.titulo || item.nombre || item.asignatura || item.materia || 'Actividad';
-                let desc = item.descripcion || item.profesor || item.lugar || item.detalle || '';
-                let hora = item.hora || item.bloque || item.horario || '--:--';
-                if (dia && dia !== ultimoDia) {
-                    ultimoDia = dia;
-                    html += `<div class="dia">${ultimoDia}</div>`;
-                }
-                html += `
-                    <div class="clase">
-                        <div>
-                            <strong>${titulo}</strong>
-                            <div class="info-secundaria">${desc}</div>
-                        </div>
-                        <div class="bloque">${hora}</div>
-                    </div>`;
-            });
-            return html;
-        }
+            let ultimoDiaRegistrado = '';
 
-        window.addEventListener('DOMContentLoaded', () => {
-            calcularFechasSemana();
-            fetchGoogleSheets();
-        });
-    </script>
-</body>
-</html>
+            lista.forEach(item => {
+                // 1. Forzar lectura exacta de tus columnas en minúsculas (el script de Sheets las pasa así)
+                let fechaOriginal = item.fecha || '';
+                let hora = item.hora || '--:--';
+                let lugar = item.lugar || '';
+                let ramo = item.ramo || 'Actividad';
+                let actividad = item.actividad || '';
+                let encargado = item.encargado || '';
+
+                // Si la celda de fecha viene vacía por fila combinada, usamos la última fecha válida
+                if (fechaOriginal.trim() !== '') {
+                    ultimoDiaRegistrado = fechaOriginal;
+                }
+                
+                let diaMostrar = ultimoDiaRegistrado || 'Sin Fecha';
+
+                // 2. Crear el encabezado del día si cambia la fecha respecto a la fila anterior
+                // Si la fila viene completamente vacía (sin actividad ni ramo), la ignoramos
+                if (!ramo && !actividad) return;
+
+                // Verificar si es una nueva sección de día
+                // Convertimos el formato para verificar cortes visuales limpios
+                if (fechaOriginal.trim() !== '' && html.indexOf(`<div class="dia">${diaMostrar}</div>`) === -1) {
+                    html += `<div class="dia">📅 ${diaMostrar}</div>`;
+                } else if (fechaOriginal.trim() === '' && html === '') {
+                    // Resguardo por si la primera fila empieza vacía
+                    html += `<div class="dia">📅 ${diaMostrar}</div>`;
+                }
+
+                // 3. Construir la tarjeta con tus campos reales
+                html += `
+                    <div class="clase" style="border-left: 4px solid var(--primary); padding-left: 15px; margin-bottom: 2px;">
+                        <div style="flex: 1; padding-right: 15px;">
+                            <strong style="color: var(--accent); font-size: 1.05em;">${ramo}</strong>
+                            <div style="margin: 4px 0; font-weight: 500; color: #333;">${actividad}</div>
+                            <div class="info-secundaria">
+                                📍 <strong>Lugar:</strong> ${lugar} | 👤 <strong>Docente:</strong> ${encargado}
+                            </div>
+                        </div>
+                        <div class="bloque" style="background: #2c3e50; color: white;">${hora}</div>
+                    </div>
+                `;
+            });
+
+            return html || '<div class="msg">No hay registros disponibles.</div>';
+        }
