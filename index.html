@@ -3,40 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Horario Automatizado</title>
+    <title>Mi Horario Semanal</title>
     <style>
         body { font-family: system-ui, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
         .container { max-width: 600px; margin: 0 auto; }
-        h1 { text-align: center; color: #2c3e50; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
+        .subtitulo { text-align: center; color: #7f8c8d; font-style: italic; margin-bottom: 25px; font-size: 0.95em; }
         .dia { background: #2c3e50; color: white; padding: 10px; border-radius: 6px 6px 0 0; margin-top: 15px; font-weight: bold; }
         .clase { background: white; padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         .clase:last-child { border-radius: 0 0 6px 6px; }
         .bloque { background: #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 0.9em; font-weight: bold; white-space: nowrap; }
-        .info-secundaria { color: #7f8c8d; font-size: 0.85em; margin-top: 4px; }
+        .info-secundaria { color: #7f8c8d; font-size: 0.85em; margin-top: 4px; line-height: 1.4; }
         .msg { text-align: center; font-style: italic; color: #7f8c8d; margin-top: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📅 Mi Horario (Jueves y Viernes)</h1>
+        <h1>📅 Mi Horario Académico</h1>
+        <div class="subtitulo" id="rango-semana">Calculando semana...</div>
         <div id="horario"><div class="msg">Sincronizando con Google Sheets...</div></div>
     </div>
 
     <script>
-        // ======= PEGA TU ENLACE DE SHEETY AQUÍ ABAJO =======
-        const URL_SHEETY = 'https://api.sheety.co/153a203611b22547f7be81ba05bd3784/hojaDeCálculoSinTítulo/clases';
+        // ======= https://api.sheety.co/153a203611b22547f7be81ba05bd3784/hojaDeCálculoSinTítulo/clases =======
+        const URL_SHEETY = 'TU_ENLACE_DE_SHEETY_AQUÍ';
         // ============================================================
 
         const contenedor = document.getElementById('horario');
+        const subtituloSemana = document.getElementById('rango-semana');
+
+        // --- CÁLCULO INTELIGENTE DE LA SEMANA ACTUAL ---
+        const hoy = new Date();
+        const diaSemana = hoy.getDay(); 
+        // Calcular el lunes de esta semana (ajustando si hoy es domingo)
+        const diferenciaLunes = diaSemana === 0 ? -6 : 1 - diaSemana;
+        
+        const lunesActual = new Date(hoy);
+        lunesActual.setDate(hoy.getDate() + diferenciaLunes);
+        lunesActual.setHours(0,0,0,0);
+
+        const domingoActual = new Date(lunesActual);
+        domingoActual.setDate(lunesActual.getDate() + 6);
+        domingoActual.setHours(23,59,59,999);
+
+        // Formatear rango visual para el subtítulo (DD/MM)
+        const formatoCorto = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+        subtituloSemana.innerText = `Semana del ${formatoCorto(lunesActual)} al ${formatoCorto(domingoActual)}`;
 
         fetch(URL_SHEETY)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error();
+                return response.json();
+            })
             .then(data => {
-                // Sheety agrupa los datos usando el nombre de la pestaña en minúsculas
-                const listaClases = data.clases || data.clase || Object.values(data)[0];
+                const listaClases = data.clases || data.clase || Object.values(data);
                 
                 if (!listaClases || listaClases.length === 0) {
-                    contenedor.innerHTML = '<div class="msg">No se encontraron datos en la planilla.</div>';
+                    contenedor.innerHTML = '<div class="msg">No se encontraron datos en tu Google Sheets.</div>';
                     return;
                 }
 
@@ -44,42 +67,43 @@
                 const grupos = {};
 
                 listaClases.forEach(c => {
-                    // Mapea exactamente los nuevos campos de tu Google Sheets
-                    const fecha = c.fecha;
-                    const hora = c.hora;
-                    const lugar = c.lugar || 'Por definir';
-                    const ramo = c.ramo || 'Sin asignatura';
-                    const actividad = c.actividad || '';
-                    const encargado = c.encargado || '';
+                    const fechaTexto = c.fecha || '';
+                    if (!fechaTexto || fechaTexto === "") return;
 
-                    if (!fecha) return;
+                    // Convertir el texto AAAA-MM-DD de Google Sheets en un objeto de fecha real
+                    const [ano, mes, dia] = fechaTexto.split('-');
+                    const fechaClase = new Date(ano, mes - 1, dia, 12, 0, 0); // Hora intermedia para evitar desfases de zona horaria
 
-                    if (!grupos[fecha]) grupos[fecha] = [];
-                    grupos[fecha].push({ hora, lugar, ramo, actividad, encargado });
+                    // FILTRO COMPACTO: Comprobar si la clase pertenece a la semana actual
+                    if (fechaClase >= lunesActual && fechaClase <= domingoActual) {
+                        if (!grupos[fechaTexto]) grupos[fechaTexto] = [];
+                        grupos[fechaTexto].push({
+                            hora: c.hora || '',
+                            lugar: c.lugar || 'Por definir',
+                            ramo: c.ramo || 'Sin nombre',
+                            actividad: c.actividad || '',
+                            encargado: c.encargado || ''
+                        });
+                    }
                 });
 
-                const hoy = new Date().toISOString().split('T')[0];
                 const fechasOrdenadas = Object.keys(grupos).sort();
-                let totalClases = 0;
+                let totalClasesSemana = 0;
 
                 fechasOrdenadas.forEach(f => {
-                    if (f < hoy) return; // Oculta automáticamente los días pasados
-                    totalClases++;
-
+                    totalClasesSemana++;
                     const grupoDia = grupos[f];
                     const divD = document.createElement('div');
                     divD.className = 'dia';
                     
-                    // Formatear fecha de AAAA-MM-DD a DD/MM/AAAA
-                    const fechaFormateada = f.includes('-') ? f.split('-').reverse().join('/') : f;
-                    divD.innerText = `Próximo Día: ${fechaFormateada}`;
+                    const fechaFormateada = f.split('-').reverse().join('/');
+                    divD.innerText = `Bloque Académico: ${fechaFormateada}`;
                     contenedor.appendChild(divD);
 
                     grupoDia.forEach(c => {
                         const divC = document.createElement('div');
                         divC.className = 'clase';
                         
-                        // Si hay actividad o encargado, añadimos el texto correspondiente
                         const textoActividad = c.actividad ? `<br>📖 <strong>Actividad:</strong> ${c.actividad}` : '';
                         const textoEncargado = c.encargado ? `<br>👤 <strong>Encargado:</strong> ${c.encargado}` : '';
                         
@@ -95,17 +119,14 @@
                     });
                 });
 
-                if (totalClases === 0) {
-                    contenedor.innerHTML = '<div class="msg">No hay actividades programadas para fechas futuras.</div>';
+                if (totalClasesSemana === 0) {
+                    contenedor.innerHTML = '<div class="msg">No tienes clases o actividades registradas para esta semana de lunes a domingo.</div>';
                 }
             })
-            .catch(err => {
-                contenedor.innerHTML = '<div class="msg" style="color:red;">Error de sincronización. Revisa tu enlace de Sheety.</div>';
-                console.error(err);
+            .catch(() => {
+                contenedor.innerHTML = '<div class="msg" style="color:red;">Error de sincronización con Sheety.</div>';
             });
     </script>
 </body>
 </html>
 
-</body>
-</html>
