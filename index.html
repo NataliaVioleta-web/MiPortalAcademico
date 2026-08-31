@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Horario Semanal</title>
+    <title>Mi Horario Académico</title>
     <style>
         body { font-family: system-ui, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
         .container { max-width: 600px; margin: 0 auto; }
@@ -19,79 +19,43 @@
 </head>
 <body>
     <div class="container">
-        <h1>📅 Mi Horario Académico</h1>
+        <h1>📅 Mi Horario Semanal</h1>
         <div class="subtitulo" id="rango-semana">Calculando semana...</div>
-        <div id="horario"><div class="msg">Sincronizando con Google Sheets...</div></div>
+        <div id="horario"><div class="msg">Conectando con Google Sheets de forma ilimitada...</div></div>
     </div>
 
     <script>
-        // ======= https://api.sheety.co/153a203611b22547f7be81ba05bd3784/hojaDeCálculoSinTítulo/clases =======
-        const URL_SHEETY = 'TU_ENLACE_DE_SHEETY_AQUÍ';
+        // ======= PEGA TU URL DE GOOGLE APPS SCRIPT AQUÍ ABAJO =======
+        const URL_SCRIPT = 'TU_URL_DE_APPS_SCRIPT_AQUÍ';
         // ============================================================
 
         const contenedor = document.getElementById('horario');
         const subtituloSemana = document.getElementById('rango-semana');
 
-        // --- CÁLCULO INTELIGENTE DE LA SEMANA ACTUAL ---
-        const hoy = new Date();
-        const diaSemana = hoy.getDay(); 
-        // Calcular el lunes de esta semana (ajustando si hoy es domingo)
-        const diferenciaLunes = diaSemana === 0 ? -6 : 1 - diaSemana;
-        
-        const lunesActual = new Date(hoy);
-        lunesActual.setDate(hoy.getDate() + diferenciaLunes);
-        lunesActual.setHours(0,0,0,0);
-
-        const domingoActual = new Date(lunesActual);
-        domingoActual.setDate(lunesActual.getDate() + 6);
-        domingoActual.setHours(23,59,59,999);
-
-        // Formatear rango visual para el subtítulo (DD/MM)
-        const formatoCorto = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
-        subtituloSemana.innerText = `Semana del ${formatoCorto(lunesActual)} al ${formatoCorto(domingoActual)}`;
-
-        fetch(URL_SHEETY)
-            .then(response => {
-                if (!response.ok) throw new Error();
-                return response.json();
-            })
+        fetch(URL_SCRIPT)
+            .then(response => response.json())
             .then(data => {
-                const listaClases = data.clases || data.clase || Object.values(data);
+                // Actualizar las fechas de la semana calculada en el servidor
+                subtituloSemana.innerText = `Semana del ${data.lunes} al ${data.domingo}`;
                 
+                const listaClases = data.clases;
                 if (!listaClases || listaClases.length === 0) {
-                    contenedor.innerHTML = '<div class="msg">No se encontraron datos en tu Google Sheets.</div>';
+                    contenedor.innerHTML = '<div class="msg">No tienes clases o actividades registradas para esta semana.</div>';
                     return;
                 }
 
                 contenedor.innerHTML = '';
                 const grupos = {};
 
+                // Agrupar clases de la semana por fecha
                 listaClases.forEach(c => {
-                    const fechaTexto = c.fecha || '';
-                    if (!fechaTexto || fechaTexto === "") return;
-
-                    // Convertir el texto AAAA-MM-DD de Google Sheets en un objeto de fecha real
-                    const [ano, mes, dia] = fechaTexto.split('-');
-                    const fechaClase = new Date(ano, mes - 1, dia, 12, 0, 0); // Hora intermedia para evitar desfases de zona horaria
-
-                    // FILTRO COMPACTO: Comprobar si la clase pertenece a la semana actual
-                    if (fechaClase >= lunesActual && fechaClase <= domingoActual) {
-                        if (!grupos[fechaTexto]) grupos[fechaTexto] = [];
-                        grupos[fechaTexto].push({
-                            hora: c.hora || '',
-                            lugar: c.lugar || 'Por definir',
-                            ramo: c.ramo || 'Sin nombre',
-                            actividad: c.actividad || '',
-                            encargado: c.encargado || ''
-                        });
-                    }
+                    if (!grupos[c.fecha]) grupos[c.fecha] = [];
+                    grupos[c.fecha].push(c);
                 });
 
                 const fechasOrdenadas = Object.keys(grupos).sort();
-                let totalClasesSemana = 0;
 
                 fechasOrdenadas.forEach(f => {
-                    totalClasesSemana++;
                     const grupoDia = grupos[f];
                     const divD = document.createElement('div');
                     divD.className = 'dia';
@@ -118,13 +82,10 @@
                         contenedor.appendChild(divC);
                     });
                 });
-
-                if (totalClasesSemana === 0) {
-                    contenedor.innerHTML = '<div class="msg">No tienes clases o actividades registradas para esta semana de lunes a domingo.</div>';
-                }
             })
-            .catch(() => {
-                contenedor.innerHTML = '<div class="msg" style="color:red;">Error de sincronización con Sheety.</div>';
+            .catch(err => {
+                contenedor.innerHTML = '<div class="msg" style="color:red;">Error de sincronización con tu Google Script. Verifica los permisos de tu implementación.</div>';
+                console.error(err);
             });
     </script>
 </body>
