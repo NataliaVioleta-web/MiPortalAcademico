@@ -7,11 +7,10 @@
     <style>
         body { font-family: system-ui, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
         .container { max-width: 600px; margin: 0 auto; }
-        h1 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
-        .subtitulo { text-align: center; color: #7f8c8d; font-style: italic; margin-bottom: 25px; font-size: 0.95em; }
-        .dia { background: #2c3e50; color: white; padding: 10px; border-radius: 6px 6px 0 0; margin-top: 15px; font-weight: bold; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 25px; }
+        .dia { background: #2c3e50; color: white; padding: 10px; border-radius: 6px 6px 0 0; margin-top: 25px; font-weight: bold; }
         .clase { background: white; padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .clase:last-child { border-radius: 0 0 6px 6px; }
+        .clase:last-child { border-radius: 0 0 6px 6px; margin-bottom: 10px; }
         .bloque { background: #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 0.9em; font-weight: bold; white-space: nowrap; }
         .info-secundaria { color: #7f8c8d; font-size: 0.85em; margin-top: 4px; line-height: 1.4; }
         .msg { text-align: center; font-style: italic; color: #7f8c8d; margin-top: 20px; }
@@ -19,9 +18,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>📅 Mi Horario Semanal</h1>
-        <div class="subtitulo" id="rango-semana">Calculando semana...</div>
-        <div id="horario"><div class="msg">Conectando con Google Sheets de forma ilimitada...</div></div>
+        <h1>📅 Mi Horario Académico</h1>
+        <div id="horario"><div class="msg">Sincronizando con Google Sheets...</div></div>
     </div>
 
     <script>
@@ -30,24 +28,20 @@
         // ============================================================
 
         const contenedor = document.getElementById('horario');
-        const subtituloSemana = document.getElementById('rango-semana');
 
         fetch(URL_SCRIPT)
             .then(response => response.json())
             .then(data => {
-                // Actualizar las fechas de la semana calculada en el servidor
-                subtituloSemana.innerText = `Semana del ${data.lunes} al ${data.domingo}`;
-                
                 const listaClases = data.clases;
                 if (!listaClases || listaClases.length === 0) {
-                    contenedor.innerHTML = '<div class="msg">No tienes clases o actividades registradas para esta semana.</div>';
+                    contenedor.innerHTML = '<div class="msg">No se encontraron actividades registradas en tu Google Sheets.</div>';
                     return;
                 }
 
                 contenedor.innerHTML = '';
                 const grupos = {};
 
-                // Agrupar clases de la semana por fecha
+                // Agrupar clases de forma directa por fecha
                 listaClases.forEach(c => {
                     if (!grupos[c.fecha]) grupos[c.fecha] = [];
                     grupos[c.fecha].push(c);
@@ -60,8 +54,9 @@
                     const divD = document.createElement('div');
                     divD.className = 'dia';
                     
+                    // Formatear fecha visual de AAAA-MM-DD a DD/MM/AAAA
                     const fechaFormateada = f.split('-').reverse().join('/');
-                    divD.innerText = `Bloque Académico: ${fechaFormateada}`;
+                    divD.innerText = `Fecha: ${fechaFormateada}`;
                     contenedor.appendChild(divD);
 
                     grupoDia.forEach(c => {
@@ -73,11 +68,11 @@
                         
                         divC.innerHTML = `
                             <div>
-                                <strong>${c.ramo}</strong><br>
-                                <small style="color:#4a90e2;">📍 ${c.lugar}</small>
+                                <strong style="font-size: 1.1em; color: #1a202c;">${c.ramo}</strong><br>
+                                <small style="color:#4a90e2; font-weight: 500;">📍 ${c.lugar}</small>
                                 <div class="info-secundaria">${textoActividad}${textoEncargado}</div>
                             </div>
-                            <div class="bloque">${c.hora || '--:--'}</div>
+                            <div class="bloque">${c.hora || 'AM/PM'}</div>
                         `;
                         contenedor.appendChild(divC);
                     });
