@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Horario Semanal</title>
+    <title>Mi Horario Automatizado</title>
     <style>
         body { font-family: system-ui, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
         .container { max-width: 600px; margin: 0 auto; }
@@ -18,67 +18,86 @@
 <body>
     <div class="container">
         <h1>📅 Mi Horario (Jueves y Viernes)</h1>
-        <div id="horario"></div>
+        <div id="horario"><div class="msg">Conectando de forma segura...</div></div>
     </div>
 
     <script>
-        // =========================================================================
-        // TU HORARIO EDITABLE (Cambia los textos que están dentro de las comillas)
-        // =========================================================================
-        const MIS_CLASES = [
-            { fecha: "2026-09-03", dia: "Jueves", bloque: "08:30 - 09:40", ramo: "Matemáticas", sala: "Sala 402", tema: "Introducción a Derivadas" },
-            { fecha: "2026-09-03", dia: "Jueves", bloque: "09:50 - 11:00", ramo: "Química", sala: "Sala 204", tema: "Estequiometría de soluciones" },
-            { fecha: "2026-09-04", dia: "Viernes", bloque: "08:30 - 09:40", ramo: "Física", sala: "Laboratorio", tema: "Cinemática Vectorial" },
-            { fecha: "2026-09-10", dia: "Jueves", bloque: "08:30 - 09:40", ramo: "Historia", sala: "Sala 101", tema: "Guerra Fría" }
-        ];
-        // =========================================================================
+        // ======= PEGA AQUÍ TU ENLACE DE SHEETY CORRESPONDIENTE =======
+        const URL_SHEETY = 'TU_ENLACE_DE_SHEETY_AQUÍ';
+        // ============================================================
 
         const contenedor = document.getElementById('horario');
-        const grupos = {};
 
-        // Agrupar las asignaturas por fecha
-        MIS_CLASES.forEach(c => {
-            if (!grupos[c.fecha]) grupos[c.fecha] = [];
-            grupos[c.fecha].push(c);
-        });
-
-        const hoy = new Date().toISOString().split('T')[0];
-        const fechasOrdenadas = Object.keys(grupos).sort();
-        let totalClasesFuturas = 0;
-
-        fechasOrdenadas.forEach(f => {
-            if (f < hoy) return; // Oculta automáticamente los días que ya pasaron
-            totalClasesFuturas++;
-
-            const grupoDia = grupos[f];
-            
-            // Dibujar cabecera del día
-            const divD = document.createElement('div');
-            divD.className = 'dia';
-            divD.innerText = `${grupoDia[0].dia} ${f.split('-').reverse().join('/')}`;
-            contenedor.appendChild(divD);
-
-            // Dibujar bloques de clases
-            grupoDia.forEach(c => {
-                const divC = document.createElement('div');
-                divC.className = 'clase';
-                const textoTema = c.tema ? `<br><span style="color:#7f8c8d;font-size:0.85em;">📖 Tema: ${c.tema}</span>` : '';
+        fetch(https://api.sheety.co/153a203611b22547f7be81ba05bd3784/hojaDeCálculoSinTítulo/clases)
+            .then(response => response.json())
+            .then(data => {
+                // Sheety devuelve los datos envueltos en el nombre de tu pestaña en minúsculas
+                const listaClases = data.clases || data.clase || Object.values(data)[0];
                 
-                divC.innerHTML = `
-                    <div>
-                        <strong>${c.ramo}</strong><br>
-                        <small style="color:#4a90e2;">📍 ${c.sala}</small>
-                        ${textoTema}
-                    </div>
-                    <div class="bloque">${c.bloque}</div>
-                `;
-                contenedor.appendChild(divC);
-            });
-        });
+                if (!listaClases || listaClases.length === 0) {
+                    contenedor.innerHTML = '<div class="msg">No hay datos en tu Google Sheets.</div>';
+                    return;
+                }
 
-        if (totalClasesFuturas === 0) {
-            contenedor.innerHTML = '<div class="msg">No hay clases registradas para fechas futuras en tu archivo.</div>';
-        }
+                contenedor.innerHTML = '';
+                const grupos = {};
+
+                listaClases.forEach(c => {
+                    // Mapea las columnas ignorando mayúsculas/minúsculas
+                    const fecha = c.fecha || c.Fecha;
+                    const dia = c.dia || c.Día || c.diaSemana;
+                    const bloque = c.bloque || c.Bloque || c.hora;
+                    const ramo = c.asignatura || c.ramo || c.Asignatura;
+                    const sala = c.sala || c.detalle || '';
+                    const tema = c.temario || c.contenido || c.tema || '';
+
+                    if (!fecha) return;
+
+                    if (!grupos[fecha]) grupos[fecha] = [];
+                    grupos[fecha].push({ dia, bloque, ramo, sala, tema });
+                });
+
+                const hoy = new Date().toISOString().split('T')[0];
+                const fechasOrdenadas = Object.keys(grupos).sort();
+                let totalClases = 0;
+
+                fechasOrdenadas.forEach(f => {
+                    if (f < hoy) return; // Filtro automático de fechas pasadas
+                    totalClases++;
+
+                    const grupoDia = grupos[f];
+                    const divD = document.createElement('div');
+                    divD.className = 'dia';
+                    
+                    // Formatear fecha visualmente
+                    const fechaFormateada = f.includes('-') ? f.split('-').reverse().join('/') : f;
+                    divD.innerText = `${grupoDia[0].dia || ''} ${fechaFormateada}`;
+                    contenedor.appendChild(divD);
+
+                    grupoDia.forEach(c => {
+                        const divC = document.createElement('div');
+                        divC.className = 'clase';
+                        const textoTema = c.tema ? `<br><span style="color:#7f8c8d;font-size:0.85em;">📖 Tema: ${c.tema}</span>` : '';
+                        
+                        divC.innerHTML = `
+                            <div>
+                                <strong>${c.ramo || 'Sin nombre'}</strong><br>
+                                <small style="color:#4a90e2;">📍 ${c.sala || 'Sin sala'}</small>
+                                ${textoTema}
+                            </div>
+                            <div class="bloque">${c.bloque || '--:--'}</div>
+                        `;
+                        contenedor.appendChild(divC);
+                    });
+                });
+
+                if (totalClases === 0) {
+                    contenedor.innerHTML = '<div class="msg">No hay clases vigentes para esta semana.</div>';
+                }
+            })
+            .catch(() => {
+                contenedor.innerHTML = '<div class="msg" style="color:red;">Error al sincronizar con Sheety. Revisa tu enlace.</div>';
+            });
     </script>
 </body>
 </html>
