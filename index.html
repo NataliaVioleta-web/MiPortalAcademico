@@ -14,7 +14,7 @@
         }
         body { font-family: system-ui, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; }
         
-        /* BARRA DE NAVEGACIÓN SUPERIOR */
+        /* BARRA DE NAVEGACIÓN SUPERIOR (BOTONES DE PÁGINA ARRIBA) */
         nav { background: var(--accent); padding: 14px; display: flex; justify-content: center; gap: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         nav a { color: white; text-decoration: none; font-weight: bold; font-size: 0.95em; padding: 8px 16px; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
         nav a:hover { background: rgba(255,255,255,0.2); }
@@ -23,19 +23,18 @@
         h1, h2 { color: var(--accent); margin-top: 0; }
         .subtitulo { color: #7f8c8d; font-style: italic; margin-bottom: 20px; font-size: 0.95em; }
         
-        /* ESTRUCTURA DE PANTALLA DIVIDIDA */
+        /* ESTRUCTURA DE PANTALLA DIVIDIDA (HORARIO IZQUIERDA, LINKS DERECHA) */
         .workspace { display: flex; gap: 30px; }
-        .col-izquierda { flex: 2; min-width: 0; } 
-        .col-derecha { flex: 1; min-width: 250px; }   
+        .col-izquierda { flex: 2; min-width: 0; } /* Ocupa más espacio para el horario */
+        .col-derecha { flex: 1; min-width: 250px; }   /* Ocupa menos espacio para los links */
         
-        /* BOTONES DE ENLACES DIGITALES */
+        /* BOTONES DE ENLACES DIGITALES (LADO DERECHO) */
         .panel-links { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .plataformas-container { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
         .btn-plataforma { text-align: center; background: var(--primary); color: white; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s; }
         .btn-plataforma:hover { background: #357abd; }
 
-        /* HORARIO, TURNOS Y PRUEBAS */
-        .seccion-bloque { margin-bottom: 30px; }
+        /* HORARIO (LADO IZQUIERDO) */
         .dia { background: var(--accent); color: white; padding: 10px; border-radius: 6px 6px 0 0; margin-top: 15px; font-weight: bold; }
         .clase { background: white; padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         .clase:last-child { border-radius: 0 0 6px 6px; margin-bottom: 10px; }
@@ -52,16 +51,16 @@
         
         .msg { text-align: center; font-style: italic; color: #7f8c8d; margin-top: 20px; }
 
-        /* RESPONSIVE */
+        /* RESPONSIVE: SI SE ABRE EN CELULAR, SE PONE UNA COLUMNA ABAJO DE OTRA */
         @media (max-width: 768px) {
             .workspace { flex-direction: column; }
-            .col-derecha { order: -1; } 
+            .col-derecha { order: -1; } /* Pone los links arriba del horario en el celular */
         }
     </style>
 </head>
 <body>
 
-    <!-- MENÚ SUPERIOR -->
+    <!-- MENÚ SUPERIOR (BOTONES DE PÁGINAS ARRIBA) -->
     <nav>
         <a onclick="cambiarPagina('inicio')">🏠 Inicio</a>
         <a onclick="cambiarPagina('documentos')">📁 Calendario OneDrive</a>
@@ -73,26 +72,11 @@
         <div id="pag-inicio" class="seccion-pagina activa">
             <div class="workspace">
                 
-                <!-- COLUMNA IZQUIERDA: CONTENIDO PRINCIPAL -->
+                <!-- COLUMNA IZQUIERDA: HORARIO ACADÉMICO -->
                 <div class="col-izquierda">
-                    <!-- Horario Semanal -->
-                    <div class="seccion-bloque">
-                        <h1>📅 Mi Horario Semanal</h1>
-                        <div class="subtitulo" id="rango-semana">Calculando semana...</div>
-                        <div id="horario"><div class="msg">Sincronizando con Google Sheets...</div></div>
-                    </div>
-
-                    <!-- Turnos Radiológicos -->
-                    <div class="seccion-bloque">
-                        <h1 style="color: #2c3e50; font-size: 1.5em;">🩺 Turnos de Toma Radiológica</h1>
-                        <div id="turnos-contenedor"><div class="msg">Sincronizando turnos...</div></div>
-                    </div>
-
-                    <!-- Próximas Pruebas -->
-                    <div class="seccion-bloque">
-                        <h1 style="color: #2c3e50; font-size: 1.5em;">🚨 Próximas Pruebas y Certámenes</h1>
-                        <div id="pruebas-contenedor"><div class="msg">Sincronizando pruebas...</div></div>
-                    </div>
+                    <h1>📅 Mi Horario Semanal</h1>
+                    <div class="subtitulo" id="rango-semana">Calculando semana...</div>
+                    <div id="horario"><div class="msg">Sincronizando con Google Sheets...</div></div>
                 </div>
 
                 <!-- COLUMNA DERECHA: PLATAFORMAS DIGITALES -->
@@ -101,8 +85,8 @@
                         <h2>🌐 Accesos Directos</h2>
                         <div class="subtitulo">Plataformas institucionales</div>
                         <div class="plataformas-container">
-                            <a href="https://unab.cl" target="_blank" class="btn-plataforma">Intranet UNAB</a>
-                            <a href="https://unab.cl" target="_blank" class="btn-plataforma">Canvas</a>
+                            <a href="https://portal2.unab.cl/ingresar-al-portal"target="_blank" class="btn-plataforma">Intranet UNAB</a>
+                            <a href="https://canvas.unab.cl/#" target="_blank" class="btn-plataforma">Canvas</a>
                         </div>
                     </div>
                 </div>
@@ -115,10 +99,9 @@
             <h1>📁 Calendario Segundo Semestre</h1>
             <div class="subtitulo">Visualización protegida en modo lectura</div>
             <div class="onedrive-wrapper">
-                <iframe src="https://sharepoint.com{55afa257-15fa-4681-82aa-e8725fd7a54d}&action=embedview&wdAllowInteractivity=False&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True"></iframe>
-            </div>
-            <div style="text-align: center; margin: 15px 0;">
-                <a href="https://sharepoint.com" target="_blank" style="display: inline-block; background: #357abd; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; font-size: 1em; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">📱 Enlace directo para celulares</a>
+                <iframe width="402" height="346" frameborder="0" scrolling="no" src="https://uandresbelloedu-my.sharepoint.com/personal/d_vonkretschmannsanm_uandresbello_edu/_layouts/15/Doc.aspx?sourcedoc={55afa257-15fa-4681-82aa-e8725fd7a54d}&action=embedview&wdAllowInteractivity=False&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True&wdInConfigurator=True"></iframe>
+             <div style="text-align: center; margin: 15px 0;">
+        <a href="https://uandresbelloedu-my.sharepoint.com/:x:/r/personal/d_vonkretschmannsanm_uandresbello_edu/Documents/Post%20grado%20Imagenolog%C3%ADa%202026/Primer%20a%C3%B1o%202026/2026%20Calendario%202do%20semestre.xlsx?d=w55afa25715fa468182aae8725fd7a54d&csf=1&web=1&e=BuOEgu" target="_blank" style="display: inline-block; background: #357abd; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; font-size: 1em; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">📱 Enlace directo para celulares</a>
             </div>
         </div>
 
@@ -126,7 +109,7 @@
 
     <script>
         // ======= CONFIGURACIÓN GENERAL =======
-        const URL_SCRIPT = 'https://google.com';
+        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKDrjUcyywiO1WoXtSyhRFevr6lvCkQ1suX374i7kDbs0uu90eCY0efqBPWe_gx932rQ/exec';
         // =====================================
 
         function cambiarPagina(pagina) {
@@ -141,9 +124,4 @@
         // Cálculo de la semana actual
         const hoy = new Date();
         const diaSemana = hoy.getDay(); 
-        const diferenciaLunes = (diaSemana === 0) ? -6 : 1 - diaSemana;
-        
-        // Aquí puedes continuar agregando la lógica de tu script de Google Sheets...
-    </script>
-</body>
-</html>
+        const diferenciaLunes = diaSemana =
