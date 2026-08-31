@@ -110,17 +110,23 @@
             subtituloSemana.innerText = `Semana del ${lunes.getDate()}/${lunes.getMonth()+1} al ${viernes.getDate()}/${viernes.getMonth()+1}`;
         }
 
+               // REEMPLAZA ESTA FUNCIÓN EN LA PARTE 3 DE TU CÓDIGO HTML
         async function fetchGoogleSheets() {
             const contHorario = document.getElementById('horario');
             const contTurnos = document.getElementById('turnos-contenedor');
             const contPruebas = document.getElementById('pruebas-contenedor');
             try {
+                // Actualiza aquí tu URL si cambió al generar la nueva versión
                 const respuesta = await fetch(URL_SCRIPT);
                 if (!respuesta.ok) throw new Error("Error de respuesta");
+                
                 const datos = await respuesta.json();
+                
+                // Mapeo adaptado a las propiedades de tus hojas
                 if (datos.horario) contHorario.innerHTML = generarBloquesHtml(datos.horario);
                 if (datos.turnos) contTurnos.innerHTML = generarBloquesHtml(datos.turnos);
                 if (datos.pruebas) contPruebas.innerHTML = generarBloquesHtml(datos.pruebas);
+                
             } catch (error) {
                 console.error("Fallo al conectar:", error);
                 const txtError = `<div class="msg" style="color: #e74c3c;">No se pudieron sincronizar los datos de Google Sheets.</div>`;
@@ -128,7 +134,6 @@
                 if(contTurnos) contTurnos.innerHTML = txtError;
                 if(contPruebas) contPruebas.innerHTML = txtError;
             }
-        }
 
         function generarBloquesHtml(lista) {
             if (!lista || lista.length === 0) return '<div class="msg">No hay registros disponibles.</div>';
