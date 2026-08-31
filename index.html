@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Horario Semanal</title>
+    <style>
+        body { font-family: system-ui, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { text-align: center; color: #2c3e50; }
+        .dia { background: #2c3e50; color: white; padding: 10px; border-radius: 6px 6px 0 0; margin-top: 15px; font-weight: bold; }
+        .clase { background: white; padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .clase:last-child { border-radius: 0 0 6px 6px; }
+        .bloque { background: #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 0.9em; font-weight: bold; }
+        .msg { text-align: center; font-style: italic; color: #7f8c8d; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📅 Mi Horario (Jueves y Viernes)</h1>
+        <div id="horario"><div class="msg">Cargando clases...</div></div>
+    </div>
+    <script>
+        const URL = 'https://google.com';
+        fetch(URL).then(r => r.text()).then(txt => {
+            const filas = txt.split('\n').map(f => f.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
+            const contenedor = document.getElementById('horario'); contenedor.innerHTML = '';
+            const grupos = {};
+            filas.slice(1).forEach(col => {
+                if (col.length < 4 || !col) return;
+                if (!grupos[col]) grupos[col] = [];
+                grupos[col].push({ dia: col, bloque: col, ramo: col, sala: col || '', tema: col || '' });
+            });
+            const hoy = new Date().toISOString().split('T');
+            const fechas = Object.keys(grupos).sort();
+            let total = 0;
+            fechas.forEach(f => {
+                if (f < hoy) return; total++;
+                const divD = document.createElement('div'); divD.className = 'dia';
+                divD.innerText = `${grupos[f].dia} ${f.split('-').reverse().join('/')}`;
+                contenedor.appendChild(divD);
+                grupos[f].forEach(c => {
+                    const divC = document.createElement('div'); divC.className = 'clase';
+                    const t = c.tema ? `<br><span style="color:#7f8c8d;font-size:0.85em;">📖 Tema: ${c.tema}</span>` : '';
+                    divC.innerHTML = `<div><strong>${c.ramo}</strong><br><small style="color:#4a90e2;">📍 ${c.sala}</small>${t}</div><div class="bloque">${c.bloque}</div>`;
+                    contenedor.appendChild(divC);
+                });
+            });
+            if (total === 0) contenedor.innerHTML = '<div class="msg">No hay clases programadas en el Sheets.</div>';
+        }).catch(() => { document.getElementById('horario').innerHTML = '<div class="msg" style="color:red;">Error de conexión.</div>'; });
+    </script>
+</body>
+</html>
