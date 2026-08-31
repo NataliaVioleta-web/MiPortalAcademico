@@ -101,8 +101,8 @@
                         <h2>🌐 Accesos Directos</h2>
                         <div class="subtitulo">Plataformas institucionales</div>
                         <div class="plataformas-container">
-                            <a href="https://unab.cl" target="_blank" class="btn-plataforma">Intranet UNAB</a>
-                            <a href="https://unab.cl" target="_blank" class="btn-plataforma">Canvas</a>
+                            <a href="https://portal2.unab.cl/ingresar-al-portal" target="_blank" class="btn-plataforma">Intranet UNAB</a>
+                            <a href="https://canvas.unab.cl/" target="_blank" class="btn-plataforma">Canvas</a>
                         </div>
                     </div>
                 </div>
@@ -144,100 +144,4 @@
         const diferenciaLunes = (diaSemana === 0) ? -6 : 1 - diaSemana;
         
         // Aquí puedes continuar agregando la lógica de tu script de Google Sheets...
-       <script>
-        // ======= CONFIGURACIÓN GENERAL =======
-        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKDrjUcyywiO1WoXtSyhRFevr6lvCkQ1suX374i7kDbs0uu90eCY0efqBPWe_gx932rQ/exec';
-        // =====================================
-
-        function cambiarPagina(pagina) {
-            document.querySelectorAll('.seccion-pagina').forEach(p => p.classList.remove('activa'));
-            if (pagina === 'inicio') document.getElementById('pag-inicio').classList.add('activa');
-            if (pagina === 'documentos') document.getElementById('pag-documentos').classList.add('activa');
-        }
-
-        // Elementos del DOM
-        const subtituloSemana = document.getElementById('rango-semana');
-        const contenedorHorario = document.getElementById('horario');
-        const contenedorTurnos = document.getElementById('turnos-contenedor');
-        const contenedorPruebas = document.getElementById('pruebas-contenedor');
-
-        // Cálculo de la semana actual
-        const hoy = new Date();
-        const diaSemana = hoy.getDay(); 
-        const diferenciaLunes = (diaSemana === 0) ? -6 : 1 - diaSemana;
-        const lunes = new Date(hoy);
-        lunes.setDate(hoy.getDate() + diferenciaLunes);
-        const viernes = new Date(lunes);
-        viernes.setDate(lunes.getDate() + 4);
-        
-        if(subtituloSemana) {
-            subtituloSemana.innerText = `Semana del ${lunes.getDate()}/${lunes.getMonth()+1} al ${viernes.getDate()}/${viernes.getMonth()+1}`;
-        }
-
-        // ===== FUNCIÓN FETCH PRINCIPAL =====
-        async function cargarDatosPlataforma() {
-            try {
-                // Realizar la petición fetch a Google Apps Script
-                const respuesta = await fetch(URL_SCRIPT);
-                if (!respuesta.ok) throw new Error('Error en la respuesta de la red');
-                
-                const datos = await respuesta.json();
-
-                // 1. Renderizar Horario Semanal
-                if (datos.horario && datos.horario.length > 0) {
-                    contenedorHorario.innerHTML = generadorHtmlEstructura(datos.horario);
-                } else {
-                    contenedorHorario.innerHTML = '<div class="msg">No hay horarios registrados para esta semana.</div>';
-                }
-
-                // 2. Renderizar Turnos Radiológicos
-                if (datos.turnos && datos.turnos.length > 0) {
-                    contenedorTurnos.innerHTML = generadorHtmlEstructura(datos.turnos);
-                } else {
-                    contenedorTurnos.innerHTML = '<div class="msg">No hay turnos asignados.</div>';
-                }
-
-                // 3. Renderizar Próximas Pruebas
-                if (datos.pruebas && datos.pruebas.length > 0) {
-                    contenedorPruebas.innerHTML = generadorHtmlEstructura(datos.pruebas);
-                } else {
-                    contenedorPruebas.innerHTML = '<div class="msg">No hay certámenes programados a la vista.</div>';
-                }
-
-            } catch (error) {
-                console.error('Error al sincronizar datos:', error);
-                const msgError = '<div class="msg" style="color: #e74c3c;">Error al conectar con Google Sheets. Revisa la configuración.</div>';
-                contenedorHorario.innerHTML = msgError;
-                contenedorTurnos.innerHTML = msgError;
-                contenedorPruebas.innerHTML = msgError;
-            }
-        }
-
-        // Función auxiliar para construir el HTML idéntico al diseño CSS de tus clases
-        function generadorHtmlEstructura(listaItems) {
-            let htmlFinal = '';
-            let diaActual = '';
-
-            listaItems.forEach(item => {
-                // Si viene estructurado por días independientes (ej: Lunes, Martes)
-                if (item.dia && item.dia !== diaActual) {
-                    diaActual = item.dia;
-                    htmlFinal += `<div class="dia">${diaActual}</div>`;
-                }
-
-                htmlFinal += `
-                    <div class="clase">
-                        <div>
-                            <strong>${item.titulo || item.nombre || 'Actividad'}</strong>
-                            <div class="info-secundaria">${item.descripcion || item.profesor || ''}</div>
-                        </div>
-                        <div class="bloque">${item.hora || item.bloque || '--:--'}</div>
-                    </div>
-                `;
-            });
-            return htmlFinal;
-        }
-
-        // Ejecutar la carga automática al abrir la página
-        window.addEventListener('DOMContentLoaded', cargarDatosPlataforma);
-    </script>
+      
