@@ -18,36 +18,64 @@
 <body>
     <div class="container">
         <h1>📅 Mi Horario (Jueves y Viernes)</h1>
-        <div id="horario"><div class="msg">Cargando clases...</div></div>
+        <div id="horario"><div class="msg">Cargando clases desde la planilla...</div></div>
     </div>
     <script>
-        const URL = 'https://google.com';
-        fetch(URL).then(r => r.text()).then(txt => {
-            const filas = txt.split('\n').map(f => f.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
-            const contenedor = document.getElementById('horario'); contenedor.innerHTML = '';
-            const grupos = {};
-            filas.slice(1).forEach(col => {
-                if (col.length < 4 || !col) return;
-                if (!grupos[col]) grupos[col] = [];
-                grupos[col].push({ dia: col, bloque: col, ramo: col, sala: col || '', tema: col || '' });
-            });
-            const hoy = new Date().toISOString().split('T');
-            const fechas = Object.keys(grupos).sort();
-            let total = 0;
-            fechas.forEach(f => {
-                if (f < hoy) return; total++;
-                const divD = document.createElement('div'); divD.className = 'dia';
-                divD.innerText = `${grupos[f].dia} ${f.split('-').reverse().join('/')}`;
-                contenedor.appendChild(divD);
-                grupos[f].forEach(c => {
-                    const divC = document.createElement('div'); divC.className = 'clase';
-                    const t = c.tema ? `<br><span style="color:#7f8c8d;font-size:0.85em;">📖 Tema: ${c.tema}</span>` : '';
-                    divC.innerHTML = `<div><strong>${c.ramo}</strong><br><small style="color:#4a90e2;">📍 ${c.sala}</small>${t}</div><div class="bloque">${c.bloque}</div>`;
-                    contenedor.appendChild(divC);
+        // Enlace base original de Google
+        const GOOGLE_URL = 'https://google.com';
+        
+        // Pasamos el enlace por un servidor Proxy libre de bloqueos
+        const PROXY_URL = 'https://corsproxy.io/?' + encodeURIComponent(GOOGLE_URL);
+
+        fetch(PROXY_URL)
+            .then(r => {
+                if (!r.ok) throw new Error();
+                return r.text();
+            })
+            .then(txt => {
+                // Procesador automático de filas CSV
+                const filas = txt.split('\n').map(f => f.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
+                const contenedor = document.getElementById('horario'); 
+                contenedor.innerHTML = '';
+                const grupos = {};
+                
+                filas.slice(1).forEach(col => {
+                    if (col.length < 4 || !col || col[0] === "") return;
+                    const f = col[0]; // Fecha
+                    if (!grupos[f]) grupos[f] = [];
+                    grupos[f].push({ dia: col[1], bloque: col[2], ramo: col[3], sala: col[4] || '', tema: col[5] || '' });
                 });
+
+                const hoy = new Date().toISOString().split('T')[0];
+                const fechas = Object.keys(grupos).sort();
+                let total = 0;
+
+                fechas.forEach(f => {
+                    if (f < hoy) return; // Oculta automáticamente los días pasados
+                    total++;
+                    
+                    const divD = document.createElement('div'); 
+                    divD.className = 'dia';
+                    divD.innerText = `${grupos[f][0].dia} ${f.split('-').reverse().join('/')}`;
+                    contenedor.appendChild(divD);
+
+                    grupos[f].forEach(c => {
+                        const divC = document.createElement('div'); 
+                        divC.className = 'clase';
+                        const t = c.tema ? `<br><span style="color:#7f8c8d;font-size:0.85em;">📖 Tema: ${c.tema}</span>` : '';
+                        divC.innerHTML = `<div><strong>${c.ramo}</strong><br><small style="color:#4a90e2;">📍 ${c.sala}</small>${t}</div><div class="bloque">${c.bloque}</div>`;
+                        contenedor.appendChild(divC);
+                    });
+                });
+
+                if (total === 0) {
+                    contenedor.innerHTML = '<div class="msg">No hay clases programadas para esta semana o fechas futuras. Revisa las fechas en tu Google Sheets.</div>';
+                }
+            })
+            .catch(() => { 
+                document.getElementById('horario').innerHTML = '<div class="msg" style="color:red;">Error al conectar con la planilla pública.</div>'; 
             });
-            if (total === 0) contenedor.innerHTML = '<div class="msg">No hay clases programadas en el Sheets.</div>';
-        }).catch(() => { document.getElementById('horario').innerHTML = '<div class="msg" style="color:red;">Error de conexión.</div>'; });
     </script>
 </body>
 </html>
+
