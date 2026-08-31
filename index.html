@@ -14,22 +14,28 @@
         }
         body { font-family: system-ui, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; }
         
-        /* BARRA DE NAVEGACIÓN */
-        nav { background: var(--accent); padding: 12px; display: flex; justify-content: center; gap: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        nav a { color: white; text-decoration: none; font-weight: bold; font-size: 0.95em; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-        nav a:hover { background: rgba(255,255,255,0.15); }
+        /* BARRA DE NAVEGACIÓN SUPERIOR (BOTONES DE PÁGINA ARRIBA) */
+        nav { background: var(--accent); padding: 14px; display: flex; justify-content: center; gap: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        nav a { color: white; text-decoration: none; font-weight: bold; font-size: 0.95em; padding: 8px 16px; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
+        nav a:hover { background: rgba(255,255,255,0.2); }
         
-        .container { max-width: 600px; margin: 20px auto; padding: 0 20px; }
-        h1 { text-align: center; color: var(--accent); margin-bottom: 5px; }
-        .subtitulo { text-align: center; color: #7f8c8d; font-style: italic; margin-bottom: 25px; font-size: 0.95em; }
+        .container { max-width: 1100px; margin: 25px auto; padding: 0 20px; }
+        h1, h2 { color: var(--accent); margin-top: 0; }
+        .subtitulo { color: #7f8c8d; font-style: italic; margin-bottom: 20px; font-size: 0.95em; }
         
-        /* BOTONES DE PLATAFORMAS DIGITALES */
-        .plataformas-container { display: flex; gap: 15px; margin-bottom: 25px; }
-        .btn-plataforma { flex: 1; text-align: center; background: var(--primary); color: white; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s; }
+        /* ESTRUCTURA DE PANTALLA DIVIDIDA (HORARIO IZQUIERDA, LINKS DERECHA) */
+        .workspace { display: flex; gap: 30px; }
+        .col-izquierda { flex: 2; min-width: 0; } /* Ocupa más espacio para el horario */
+        .col-derecha { flex: 1; min-width: 250px; }   /* Ocupa menos espacio para los links */
+        
+        /* BOTONES DE ENLACES DIGITALES (LADO DERECHO) */
+        .panel-links { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .plataformas-container { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .btn-plataforma { text-align: center; background: var(--primary); color: white; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s; }
         .btn-plataforma:hover { background: #357abd; }
 
-        /* HORARIO */
-        .dia { background: var(--accent); color: white; padding: 10px; border-radius: 6px 6px 0 0; margin-top: 25px; font-weight: bold; }
+        /* HORARIO (LADO IZQUIERDO) */
+        .dia { background: var(--accent); color: white; padding: 10px; border-radius: 6px 6px 0 0; margin-top: 15px; font-weight: bold; }
         .clase { background: white; padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         .clase:last-child { border-radius: 0 0 6px 6px; margin-bottom: 10px; }
         .bloque { background: #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 0.9em; font-weight: bold; white-space: nowrap; }
@@ -39,16 +45,22 @@
         .seccion-pagina { display: none; }
         .activa { display: block; }
 
-        /* CONTENEDOR ONEDRIVE PROTEGIDO */
-        .onedrive-wrapper { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 75vh; margin-top: 15px; }
+        /* CONTENEDOR ONEDRIVE */
+        .onedrive-wrapper { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 78vh; }
         iframe { width: 100%; height: 100%; border: none; border-radius: 4px; }
         
         .msg { text-align: center; font-style: italic; color: #7f8c8d; margin-top: 20px; }
+
+        /* RESPONSIVE: SI SE ABRE EN CELULAR, SE PONE UNA COLUMNA ABAJO DE OTRA */
+        @media (max-width: 768px) {
+            .workspace { flex-direction: column; }
+            .col-derecha { order: -1; } /* Pone los links arriba del horario en el celular */
+        }
     </style>
 </head>
 <body>
 
-    <!-- MENÚ SUPERIOR -->
+    <!-- MENÚ SUPERIOR (BOTONES DE PÁGINAS ARRIBA) -->
     <nav>
         <a onclick="cambiarPagina('inicio')">🏠 Inicio</a>
         <a onclick="cambiarPagina('documentos')">📁 Apuntes OneDrive</a>
@@ -56,25 +68,38 @@
 
     <div class="container">
         
-        <!-- PÁGINA 1: INICIO (HORARIO Y ACCESOS DIRECTOS) -->
+        <!-- PÁGINA 1: INICIO -->
         <div id="pag-inicio" class="seccion-pagina activa">
-            <!-- LINKS A PLATAFORMAS DIGITALES -->
-            <div class="plataformas-container">
-                <a href="https://portal2.unab.cl/home?check_logged_in=1" target="_blank" class="btn-plataforma">🌐 Intranet UNAB</a>
-                <a href="https://canvas.unab.cl/#" target="_blank" class="btn-plataforma">💻 Canvas</a>
-            </div>
+            <div class="workspace">
+                
+                <!-- COLUMNA IZQUIERDA: HORARIO ACADÉMICO -->
+                <div class="col-izquierda">
+                    <h1>📅 Mi Horario Semanal</h1>
+                    <div class="subtitulo" id="rango-semana">Calculando semana...</div>
+                    <div id="horario"><div class="msg">Sincronizando con Google Sheets...</div></div>
+                </div>
+                
+                <!-- COLUMNA DERECHA: PLATAFORMAS DIGITALES -->
+                <div class="col-derecha">
+                    <div class="panel-links">
+                        <h2>🌐 Accesos Directos</h2>
+                        <div class="subtitulo">Plataformas institucionales</div>
+                        <div class="plataformas-container">
+                            <a href="https://enlace1.com" target="_blank" class="btn-plataforma">Plataforma 1</a>
+                            <a href="https://enlace2.com" target="_blank" class="btn-plataforma">Plataforma 2</a>
+                        </div>
+                    </div>
+                </div>
 
-            <h1>📅 Mi Horario Semanal</h1>
-            <div class="subtitulo" id="rango-semana">Calculando semana...</div>
-            <div id="horario"><div class="msg">Sincronizando con Google Sheets...</div></div>
+            </div>
         </div>
 
-        <!-- PÁGINA 2: ONEDRIVE (SOLO VISUALIZACIÓN SEGURO) -->
+        <!-- PÁGINA 2: ONEDRIVE -->
         <div id="pag-documentos" class="seccion-pagina">
             <h1>📁 Repositorio de Apuntes</h1>
             <div class="subtitulo">Visualización protegida en modo lectura</div>
             <div class="onedrive-wrapper">
-                <iframe width="402" height="346" frameborder="0" scrolling="no" src="https://uandresbelloedu-my.sharepoint.com/personal/d_vonkretschmannsanm_uandresbello_edu/_layouts/15/Doc.aspx?sourcedoc={55afa257-15fa-4681-82aa-e8725fd7a54d}&action=embedview&wdAllowInteractivity=False&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True&wdInConfigurator=True"></iframe>
+                <iframe src="TU_ENLACE_DE_EMBED_DE_ONEDRIVE_AQUÍ"></iframe>
             </div>
         </div>
 
@@ -82,10 +107,9 @@
 
     <script>
         // ======= CONFIGURACIÓN GENERAL =======
-        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKDrjUcyywiO1WoXtSyhRFevr6lvCkQ1suX374i7kDbs0uu90eCY0efqBPWe_gx932rQ/exec';
+        const URL_SCRIPT = 'TU_URL_DE_APPS_SCRIPT_AQUÍ';
         // =====================================
 
-        // Cambiar entre la página de inicio y la del OneDrive sin recargar
         function cambiarPagina(pagina) {
             document.querySelectorAll('.seccion-pagina').forEach(p => p.classList.remove('activa'));
             if (pagina === 'inicio') document.getElementById('pag-inicio').classList.add('activa');
