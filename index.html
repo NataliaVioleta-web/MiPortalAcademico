@@ -198,26 +198,35 @@
             });
         }
 
+                // VERSIÓN DIRECTA AUTOMÁTICA SEMESTRAL: Muestra toda tu lista real sin filtros restrictivos
         function generarBloquesHtml(lista, colorBorde = '#2c3e50', mostrarTodoElSemestre = false) {
-            const hoy = new Date();
-            hoy.setHours(0,0,0,0);
-
-            let listaFiltrada = mostrarTodoElSemestre ? lista : filtrarSoloEstaSemana(lista);
-            if (!listaFiltrada || listaFiltrada.length === 0) return '<div class="msg">No hay registros programados.</div>';
-
-            if (mostrarTodoElSemestre) {
-                listaFiltrada = listaFiltrada.filter(item => {
-                    let f = interpretarFecha(item.fecha);
-                    return f && f >= hoy; 
-                }).sort((a, b) => interpretarFecha(a.fecha) - interpretarFecha(b.fecha));
+            if (!lista || !Array.isArray(lista) || lista.length === 0) {
+                return '<div class="msg">No hay registros programados para este período.</div>';
             }
 
-            if (listaFiltrada.length === 0) return '<div class="msg">No hay próximas actividades programadas en este bloque.</div>';
+            let listaProcesada = [...lista];
+
+            // Si es la vista extendida, ordenamos tus fechas cronológicamente de menor a mayor
+            if (mostrarTodoElSemestre) {
+                listaProcesada.sort((a, b) => {
+                    let fA = interpretarFecha(a.fecha);
+                    let fB = interpretarFecha(b.fecha);
+                    if (!fA || !fB) return 0;
+                    return fA - fB;
+                });
+            } else {
+                // Para el horario diario, usamos tu filtro de la semana actual
+                listaProcesada = filtrarSoloEstaSemana(lista);
+            }
+
+            if (listaProcesada.length === 0) {
+                return '<div class="msg">No hay actividades para esta semana.</div>';
+            }
 
             let html = '';
             let ultimoDiaRegistrado = '';
 
-            listaFiltrada.forEach(item => {
+            listaProcesada.forEach(item => {
                 let fechaOriginal = item.fecha || '';
                 let hora = item.hora || '--:--';
                 let lugar = item.lugar || '';
@@ -225,8 +234,9 @@
                 let actividad = item.actividad || '';
                 let encargado = item.encargado || '';
 
-                let fechaObjeto = interpretarFecha(fechaOriginal);
-                let diaMostrar = fechaObjeto ? `${fechaObjeto.getDate()}/${fechaObjeto.getMonth()+1}/${fechaObjeto.getFullYear()}` : fechaOriginal;
+                // Formateamos la fecha visualmente para que se vea ordenada (ej: 10/9/2026)
+                let fObj = interpretarFecha(fechaOriginal);
+                let diaMostrar = fObj ? `${fObj.getDate()}/${fObj.getMonth()+1}/${fObj.getFullYear()}` : fechaOriginal;
 
                 if (diaMostrar !== ultimoDiaRegistrado) {
                     html += `<div class="dia" style="color: ${colorBorde};">📅 ${diaMostrar}</div>`;
@@ -236,7 +246,7 @@
                 html += `
                     <div class="clase" style="border-left: 4px solid ${colorBorde};">
                         <div style="flex: 1; padding-right: 15px;">
-                            <strong style="color: #2c3e50; font-size: 1.05em;">${ramo && ramo !== '-' ? ramo : 'Asignación'}</strong>
+                            <strong style="color: #2c3e50; font-size: 1.05em;">${ramo && ramo !== '-' ? ramo : 'Turno Clínico'}</strong>
                             <div style="margin: 3px 0; font-weight: 500; color: #555; font-size:0.95em;">${actividad}</div>
                             <div class="info-secundaria">
                                 📍 <strong>Lugar:</strong> ${lugar} ${encargado ? `| 👤 <strong>Docente:</strong> ${encargado}` : ''}
@@ -249,6 +259,7 @@
 
             return html;
         }
+
 
         async function cargarDatosDesdeSheets() {
             const contenedorHorario = document.getElementById('contenedor-horario');
