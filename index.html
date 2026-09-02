@@ -138,7 +138,7 @@
     <script>
         const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKDrjUcyywiO1WoXtSyhRFevr6lvCkQ1suX374i7kDbs0uu90eCY0efqBPWe_gx932rQ/exec';
 
-               let fechaLunes, fechaDomingo, fechaLimiteTresSemanas;
+        let fechaLunes, fechaDomingo, fechaLimiteTresSemanas;
 
         function calcularFechasSemana() {
             const subtituloSemana = document.getElementById('rango-semana');
@@ -154,15 +154,15 @@
             fechaDomingo.setDate(fechaLunes.getDate() + 6);
             fechaDomingo.setHours(23,59,59,999);
 
-            // Calculamos el domingo de la subsiguiente semana (2 semanas más después de esta)
             fechaLimiteTresSemanas = new Date(fechaLunes);
-            fechaLimiteTresSemanas.setDate(fechaLunes.getDate() + 20); // 21 días en total
+            fechaLimiteTresSemanas.setDate(fechaLunes.getDate() + 20); // 21 días de intervalo
             fechaLimiteTresSemanas.setHours(23,59,59,999);
 
             subtituloSemana.innerText = `Semana del ${fechaLunes.getDate()}/${fechaLunes.getMonth()+1} al ${fechaDomingo.getDate()}/${fechaDomingo.getMonth()+1}`;
         }
 
-            function interpretarFecha(textoFecha) {
+        // Lector corregido y ultra robusto para evitar colapsos
+        function interpretarFecha(textoFecha) {
             if (!textoFecha) return null;
             let stringFecha = String(textoFecha).trim();
             
@@ -170,50 +170,26 @@
                 stringFecha = stringFecha.split('T')[0];
             }
             
-            // 1. Formato con guiones (Año-Mes-Día o Día-Mes-Año)
-            if (stringFecha.includes('-')) {
-                const partes = stringFecha.split('-');
-                if (partes.length === 3) {
-                    if (partes[0].length === 4) { // yyyy-mm-dd
-                        return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
-                    } else { // dd-mm-yyyy
-                        return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
-                    }
-                }
-            }
+            let partes = [];
+            if (stringFecha.includes('-')) partes = stringFecha.split('-');
+            else if (stringFecha.includes('/')) partes = stringFecha.split('/');
             
-            // 2. Formato con barras (Día/Mes/Año o Año/Mes/Día)
-            if (stringFecha.includes('/')) {
-                const partes = stringFecha.split('/');
-                if (partes.length === 3) {
-                    if (partes[0].length === 4) { // yyyy/mm/dd
-                        return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
-                    } else { // dd/mm/yyyy
-                        return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
-                    }
-                }
+            if (partes.length !== 3) return null;
+
+            let anio, mes, dia;
+            if (partes[0].length === 4) { // yyyy-mm-dd
+                anio = parseInt(partes[0], 10);
+                mes = parseInt(partes[1], 10) - 1;
+                dia = parseInt(partes[2], 10);
+            } else { // dd-mm-yyyy
+                dia = parseInt(partes[0], 10);
+                mes = parseInt(partes[1], 10) - 1;
+                anio = parseInt(partes[2], 10);
             }
-            
-            return null;
+
+            return new Date(anio, mes, dia);
         }
 
-            
-            // 2. Formato con barras (Día/Mes/Año o Año/Mes/Día)
-            if (stringFecha.includes('/')) {
-                const partes = stringFecha.split('/');
-                if (partes.length === 3) {
-                    if (partes[0].length === 4) { // yyyy/mm/dd
-                        return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
-                    } else { // dd/mm/yyyy
-                        return new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
-                    }
-                }
-            }
-            
-            return null;
-        }
-
-                // Filtro estricto para el Horario (semana actual)
         function filtrarSoloEstaSemana(lista) {
             if (!lista || !Array.isArray(lista)) return [];
             let ultimoDiaValido = null;
@@ -229,8 +205,7 @@
             });
         }
 
-        // Nuevo filtro extendido para Pruebas y Turnos (Esta semana + Próxima + Subsiguiente)
-              function filtrarTresSemanas(lista) {
+        function filtrarTresSemanas(lista) {
             if (!lista || !Array.isArray(lista)) return [];
             let ultimoDiaValido = null;
 
@@ -241,7 +216,6 @@
                 let fechaEvaluar = interpretarFecha(fechaTexto !== '' ? fechaTexto : ultimoDiaValido);
                 if (!fechaEvaluar) return false;
 
-                // Ponemos las horas en cero para comparar limpiamente solo días
                 const evalFecha = new Date(fechaEvaluar).setHours(0,0,0,0);
                 const inicioLunes = new Date(fechaLunes).setHours(0,0,0,0);
                 const finSubsiguiente = new Date(fechaLimiteTresSemanas).setHours(23,59,59,999);
@@ -249,11 +223,10 @@
                 return evalFecha >= inicioLunes && evalFecha <= finSubsiguiente;
             });
         }
-        
-               function generarBloquesHtml(lista, colorBorde = '#2c3e50', usarTresSemanas = false) {
-            // Si el parámetro usarTresSemanas es verdadero, usa el filtro extendido
+
+        function generarBloquesHtml(lista, colorBorde = '#2c3e50', usarTresSemanas = false) {
             const listaFiltrada = usarTresSemanas ? filtrarTresSemanas(lista) : filtrarSoloEstaSemana(lista);
-            if (listaFiltrada.length === 0) return '<div class="msg">No hay registros programados para este período.</div>';
+            if (listaFiltrada.length === 0) return '<div class="msg">No hay registros programados.</div>';
             
             let html = '';
             let ultimoDiaRegistrado = '';
@@ -292,9 +265,9 @@
             return html;
         }
 
-                      function generarTurnosHtml(lista) {
+        function generarTurnosHtml(lista) {
             const listaFiltrada = filtrarTresSemanas(lista);
-            if (listaFiltrada.length === 0) return '<div class="msg">No tienes turnos radiográficos asignados para estas 3 semanas.</div>';
+            if (listaFiltrada.length === 0) return '<div class="msg">No tienes turnos asignados para estas 3 semanas.</div>';
             
             let html = '';
             listaFiltrada.forEach(item => {
@@ -319,7 +292,7 @@
             return html;
         }
 
-                async function cargarDatosDesdeSheets() {
+        async function cargarDatosDesdeSheets() {
             const contenedorHorario = document.getElementById('contenedor-horario');
             const contenedorPruebas = document.getElementById('contenedor-pruebas');
             const contenedorTurnos = document.getElementById('contenedor-turnos');
@@ -330,13 +303,8 @@
                 
                 const datos = await respuesta.json();
 
-                // Horario: Solo esta semana (falso/por defecto)
                 contenedorHorario.innerHTML = generarBloquesHtml(datos.clases, '#2c3e50', false);
-                
-                // Pruebas: Rango de 3 semanas (activamos pasando true)
                 contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas, '#e74c3c', true);
-                
-                // Turnos: Modificado internamente para 3 semanas
                 contenedorTurnos.innerHTML = generarTurnosHtml(datos.turnos);
 
             } catch (error) {
@@ -355,3 +323,4 @@
     </script>
 </body>
 </html>
+
