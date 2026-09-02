@@ -261,18 +261,24 @@
                 
                 const datos = await respuesta.json();
 
+                // 1. Horario: Solo lo de esta semana
                 contenedorHorario.innerHTML = generarBloquesHtml(datos.clases, '#2c3e50', false);
+                
+                // 2. Pruebas: Todo el semestre hacia adelante
                 contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas, '#e74c3c', true);
+                
+                // 3. CORREGIDO: Cambiamos a 'true' para mostrar todos los turnos futuros del semestre
                 contenedorTurnos.innerHTML = generarBloquesHtml(datos.turnos, '#f1c40f', true);
 
             } catch (error) {
                 console.error("Error:", error);
-                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar con Google Sheets. Revisa la URL.</div>';
+                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar con Google Sheets.</div>';
                 contenedorHorario.innerHTML = msgError;
                 contenedorPruebas.innerHTML = msgError;
                 contenedorTurnos.innerHTML = msgError;
             }
         }
+
 
         document.addEventListener("DOMContentLoaded", () => {
             calcularFechasSemana();
