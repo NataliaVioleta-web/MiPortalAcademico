@@ -41,11 +41,11 @@
 
         /* Contenedor en dos columnas para computadoras */
         .contenedor-principal {
-            max-width: 1000px;
+            max-width: 1100px; /* Ampliado un poco para que quepa todo perfecto */
             margin: 0 auto;
             padding: 0 15px;
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1.6fr 1.2fr; /* Equilibrio de tamaños entre columnas */
             gap: 20px;
         }
 
@@ -122,28 +122,28 @@
             text-align: center;
             color: white;
             text-decoration: none;
-            padding: 12px;
+            padding: 11px;
             border-radius: 8px;
             font-weight: bold;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: 0.2s;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+        }
+
+        .btn-enlace:last-child {
+            margin-bottom: 0;
         }
 
         .btn-enlace:hover {
             filter: brightness(0.9);
         }
 
-        /* DISEÑO RESPONSIVO: Si se abre en celulares, vuelve a una sola columna */
+        /* DISEÑO RESPONSIVO: Si se abre en celulares, se transforma a una sola columna ordenada hacia abajo */
         @media (max-width: 768px) {
             .contenedor-principal {
                 grid-template-columns: 1fr;
                 gap: 0;
-            }
-            /* En celular pasamos los enlaces arriba para que no queden al final del todo */
-            .columna-derecha {
-                order: -1;
             }
         }
     </style>
@@ -151,51 +151,52 @@
 <body>
 
     <header>
-        <h1>🏬 Mi Portal Académico</h1>
+        <h1>📚 Mi Portal Académico</h1>
         <h2 id="rango-semana">Calculando semana...</h2>
     </header>
 
     <div class="contenedor-principal">
         
-        <!-- COLUMNA IZQUIERDA (Horario, Pruebas y Turnos) -->
+        <!-- COLUMNA IZQUIERDA (Ocupa el espacio principal con tu Horario Semanal) -->
         <div class="columna-izquierda">
             <div class="seccion-bloque">
                 <h3 class="titulo-recuadro" style="border-left-color: var(--primary);">📅 Mi Horario Semanal</h3>
                 <div id="contenedor-horario">
-                    <div class="msg">Cargando horario... </div>
-                </div>
-            </div>
-
-            <div class="seccion-bloque">
-                <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas</h3>
-                <div id="contenedor-pruebas">
-                    <div class="msg">Cargando pruebas... </div>
-                </div>
-            </div>
-
-            <div class="seccion-bloque">
-                <h3 class="titulo-recuadro" style="border-left-color: var(--warning);">🦷 Turnos de Toma Radiográfica</h3>
-                <div id="contenedor-turnos">
-                    <div class="msg">Cargando turnos... </div>
+                    <div class="msg">Cargando horario... 🔄</div>
                 </div>
             </div>
         </div>
 
-        <!-- COLUMNA DERECHA (Accesos Directos al lado derecho) -->
+        <!-- COLUMNA DERECHA (Accesos directos, Pruebas y Turnos agrupados juntos) -->
         <div class="columna-derecha">
-            <div class="seccion-bloque" style="background: #eaf2f8; border: 1px solid #d4e6f1; position: sticky; top: 20px;">
-                <h3 class="titulo-recuadro" style="border-left-color: #2980b9; color: #2980b9; margin-bottom: 20px;">🔗 Plataformas educacionales</h3>
-                
-                <!-- BOTÓN 1: Cambia el enlace por el tuyo -->
-                <a href="https://portal2.unab.cl/ingresar-al-portal" target="_blank" class="btn-enlace" style="background: #2980b9;">
+            
+            <!-- Recuadro 1: Accesos Directos U -->
+            <div class="seccion-bloque" style="background: #eaf2f8; border: 1px solid #d4e6f1;">
+                <h3 class="titulo-recuadro" style="border-left-color: #2980b9; color: #2980b9; margin-bottom: 15px;">🔗 Accesos Directos</h3>
+                <a href="https://universidad.cl" target="_blank" class="btn-enlace" style="background: #2980b9;">
                     🌐 Portal Alumno
                 </a>
-                
-                <!-- BOTÓN 2: Cambia el enlace por el tuyo -->
-                <a href="https://canvas.unab.cl/" target="_blank" class="btn-enlace" style="background: #2980b9;">
-                    📚 Canvas
+                <a href="https://universidad.cl" target="_blank" class="btn-enlace" style="background: #27ae60;">
+                    📚 Aula Virtual
                 </a>
             </div>
+
+            <!-- Recuadro 2: Próximas Pruebas (Mes móvil) -->
+            <div class="seccion-bloque">
+                <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas</h3>
+                <div id="contenedor-pruebas">
+                    <div class="msg">Cargando pruebas... 🔄</div>
+                </div>
+            </div>
+
+            <!-- Recuadro 3: Turnos Clínicos de Toma Radiográfica (Mes móvil) -->
+            <div class="seccion-bloque">
+                <h3 class="titulo-recuadro" style="border-left-color: var(--warning);">🦷 Turnos de Toma Radiográfica</h3>
+                <div id="contenedor-turnos">
+                    <div class="msg">Cargando turnos... 🔄</div>
+                </div>
+            </div>
+
         </div>
 
     </div>
