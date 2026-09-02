@@ -231,13 +231,16 @@
             let html = '';
             let ultimoDiaRegistrado = '';
 
-            listaFiltrada.forEach(item => {
+                        listaFiltrada.forEach(item => {
                 let fechaOriginal = item.fecha || '';
                 let hora = item.hora || '--:--';
                 let lugar = item.lugar || '';
                 let ramo = item.ramo || 'Actividad';
-                let actividad = item.actividad || item.detalle || '';
-                let encargado = item.encargado || item.docente || item.profesor || '';
+                
+                // Buscamos las palabras sin espacios ni caracteres especiales
+                let actividad = item.actividad || item.actividades || '';
+                let encargado = item.encargado || item.docente || '';
+
 
                 if (fechaOriginal.trim() !== '') ultimoDiaRegistrado = fechaOriginal;
                 let diaMostrar = ultimoDiaRegistrado || 'Sin Fecha';
