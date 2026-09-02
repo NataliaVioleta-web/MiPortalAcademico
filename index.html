@@ -301,34 +301,6 @@
             return html;
         }
 
-
-        function generarTurnosHtml(lista) {
-            const listaFiltrada = filtrarSoloEstaSemana(lista);
-            if (listaFiltrada.length === 0) return '<div class="msg">No tienes turnos radiográficos asignados esta semana.</div>';
-            
-            let html = '';
-            listaFiltrada.forEach(item => {
-                let fecha = item.fecha || 'Sin fecha';
-                let hora = item.hora || 'Todo el día';
-                let grupo = item.grupo || item.equipo || '';
-                let clinica = item.clinica || item.lugar || 'Clínica Radiológica';
-                let detalles = item.detalles || item.observaciones || '';
-
-                html += `
-                    <div class="clase" style="border-left: 4px solid var(--warning);">
-                        <div style="flex: 1;">
-                            <span style="font-size: 0.8rem; font-weight: bold; color: #d35400; background: #fef9e7; padding: 2px 8px; border-radius: 4px;">📅 ${fecha} (${hora})</span>
-                            <div style="margin: 5px 0 2px 0; font-weight: 600; color: #2c3e50;">${clinica}</div>
-                            <div class="info-secundaria">
-                                👥 <strong>Asignación:</strong> ${grupo} ${detalles ? `| 📝 ${detalles}` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            return html;
-        }
-
                 async function cargarDatosDesdeSheets() {
             const contenedorHorario = document.getElementById('contenedor-horario');
             const contenedorPruebas = document.getElementById('contenedor-pruebas');
