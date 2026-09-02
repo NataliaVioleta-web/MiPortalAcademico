@@ -292,8 +292,7 @@
             return html;
         }
 
-                function generarTurnosHtml(lista) {
-            // Forzamos explícitamente el uso del filtro de 3 semanas
+                      function generarTurnosHtml(lista) {
             const listaFiltrada = filtrarTresSemanas(lista);
             if (listaFiltrada.length === 0) return '<div class="msg">No tienes turnos radiográficos asignados para estas 3 semanas.</div>';
             
