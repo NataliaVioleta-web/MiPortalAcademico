@@ -24,77 +24,79 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            padding-bottom: 70px; /* Espacio para el menú del celular */
+            padding-bottom: 70px;
         }
 
+        /* Barra de Navegación Superior (Computadoras) */
         header {
             background-color: var(--primary);
             color: white;
-            text-align: center;
-            padding: 20px;
+            padding: 15px 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
         }
 
-        h1 { font-size: 1.5rem; margin-bottom: 6px; }
-        h2 { font-size: 0.95rem; opacity: 0.9; font-weight: 400; }
-
-        /* Pestañas de Navegación de Arriba (PC) */
-        .nav-superior {
-            background: white;
+        .header-contenedor {
+            max-width: 1100px;
+            margin: 0 auto;
             display: flex;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .nav-superior button {
-            background: none;
+        .header-titulos h1 { font-size: 1.4rem; }
+        .header-titulos h2 { font-size: 0.9rem; opacity: 0.9; font-weight: 400; }
+
+        .nav-superior { display: flex; gap: 10px; }
+
+        .nav-btn {
+            color: white;
+            background: rgba(255,255,255,0.1);
             border: none;
-            padding: 15px 30px;
-            font-size: 1rem;
-            font-weight: bold;
-            color: #7f8c8d;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
             cursor: pointer;
-            border-bottom: 3px solid transparent;
             transition: 0.2s;
         }
 
-        .nav-superior button.activo {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
+        .nav-btn:hover, .nav-btn.activo {
+            background: rgba(255,255,255,0.25);
+            box-shadow: inset 0 -2px 0 white;
         }
 
-        /* Pestañas de Navegación de Abajo (Celular) */
+        /* Barra de Navegación Inferior (Celulares) */
         .nav-inferior {
             display: none;
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            background: white;
-            justify-content: space-around;
+            background: var(--primary);
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 2000;
+            z-index: 1000;
         }
 
-        .nav-inferior button {
-            background: none;
-            border: none;
-            padding: 12px 0;
-            width: 100%;
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #7f8c8d;
-            cursor: pointer;
+        .nav-inferior .nav-btn {
+            flex: 1;
+            text-align: center;
+            border-radius: 0;
+            background: transparent;
+            padding: 15px 0;
+            font-size: 0.9rem;
         }
 
-        .nav-inferior button.activo {
-            color: var(--primary);
-            background: #f8f9fa;
-            border-top: 3px solid var(--primary);
+        .nav-inferior .nav-btn.activo {
+            background: rgba(255,255,255,0.1);
+            box-shadow: inset 0 3px 0 white;
         }
 
-        /* Páginas */
+        .nav-inferior .nav-btn:not(:last-child) {
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Secciones de Páginas */
         .pagina-seccion {
             display: none;
         }
@@ -103,19 +105,14 @@
             display: block;
         }
 
-        /* Contenedor de Dos Columnas en Computadora */
-        .contenedor-grid {
+        /* Diseño de dos columnas principales (Página Inicio) */
+        .contenedor-principal {
             max-width: 1100px;
             margin: 0 auto;
             padding: 0 15px;
             display: grid;
-            grid-template-columns: 1.6fr 1fr;
+            grid-template-columns: 1.8fr 1.2fr;
             gap: 20px;
-        }
-
-        .columna-izquierda, .columna-derecha {
-            display: flex;
-            flex-direction: column;
         }
 
         .seccion-bloque {
@@ -127,7 +124,7 @@
         }
 
         .titulo-recuadro {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             color: var(--primary);
             margin-bottom: 15px;
             padding-left: 12px;
@@ -137,7 +134,7 @@
         .dia {
             font-weight: bold;
             margin: 15px 0 8px 0;
-            font-size: 0.95rem;
+            font-size: 1rem;
             border-bottom: 1px solid #eaeded;
             padding-bottom: 4px;
         }
@@ -182,122 +179,101 @@
             padding: 12px;
             border-radius: 8px;
             font-weight: bold;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 10px;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: 0.2s;
+            margin-bottom: 10px;
         }
 
         .btn-enlace:hover { filter: brightness(0.9); }
 
-        /* Contenedor OneDrive adaptable */
-        .contenedor-onedrive {
-            position: relative;
-            width: 100%;
-            height: 75vh;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-            background: white;
+        /* Contenedor responsivo para el Iframe de OneDrive */
+        .iframe-contenedor {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 15px;
+            height: calc(100vh - 160px);
+            min-height: 500px;
         }
 
-        .contenedor-onedrive iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .iframe-contenedor iframe {
             width: 100%;
             height: 100%;
             border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            background: white;
         }
 
-        /* DISEÑO PARA CELULARES Y TABLETS */
-        @media (max-width: 850px) {
+        @media (max-width: 768px) {
+            body { padding-bottom: 60px; }
+            .contenedor-principal { grid-template-columns: 1fr; gap: 0; }
             .nav-superior { display: none; }
             .nav-inferior { display: flex; }
-            
-            .contenedor-grid {
-                grid-template-columns: 1fr;
-                gap: 0;
-                padding: 0 10px;
-            }
-            
-            /* En el celular mandamos los accesos directos arriba del horario */
-            .columna-derecha {
-                order: -1;
-            }
+            .iframe-contenedor { height: calc(100vh - 140px); }
         }
     </style>
 </head>
 <body>
 
+    <!-- MENÚ SUPERIOR (PC) -->
     <header>
-        <h1>📚 Mi Portal Académico</h1>
-        <h2 id="rango-semana">Calculando semana...</h2>
+        <div class="header-contenedor">
+            <div class="header-titulos">
+                <h1>📚 Mi Portal Académico</h1>
+                <h2 id="rango-semana">Calculando semana...</h2>
+            </div>
+            <nav class="nav-superior">
+                <button class="nav-btn activo" onclick="irAPagina('inicio')">📅 Mi Horario</button>
+                <button class="nav-btn" onclick="irAPagina('onedrive')">📂 Mi OneDrive</button>
+            </nav>
+        </div>
     </header>
 
-    <!-- MENÚ SUPERIOR (Solo visible en Computadoras) -->
-    <nav class="nav-superior">
-        <button class="btn-tab-inicio activo" onclick="cambiarSeccion('inicio')">📅 Mi Horario</button>
-        <button class="btn-tab-onedrive" onclick="cambiarSeccion('onedrive')">📂 OneDrive Universitario</button>
-    </nav>
-
-    <!-- PÁGINA 1: INICIO (HORARIO Y RECUADROS LATERALES) -->
-    <main id="seccion-inicio" class="pagina-seccion activa">
-        <div class="contenedor-grid">
+    <!-- PÁGINA 1: PORTAL ACADÉMICO PRINCIPAL -->
+    <main id="pag-inicio" class="pagina-seccion activa">
+        <div class="contenedor-principal">
             
-            <!-- Columna Izquierda: El Horario Semanal -->
             <div class="columna-izquierda">
                 <div class="seccion-bloque">
                     <h3 class="titulo-recuadro" style="border-left-color: var(--primary);">📅 Mi Horario Semanal</h3>
-                    <div id="contenedor-horario">
-                        <div class="msg">Cargando horario... </div>
-                    </div>
+                    <div id="contenedor-horario"><div class="msg">Cargando horario... 🔄</div></div>
                 </div>
             </div>
 
-            <!-- Columna Derecha: Accesos Directos, Pruebas y Turnos -->
             <div class="columna-derecha">
-                <!-- Recuadro Enlaces -->
                 <div class="seccion-bloque" style="background: #eaf2f8; border: 1px solid #d4e6f1;">
                     <h3 class="titulo-recuadro" style="border-left-color: #2980b9; color: #2980b9;">🔗 Accesos Directos</h3>
                     <a href="https://universidad.cl" target="_blank" class="btn-enlace" style="background: #2980b9;">🌐 Portal Alumno</a>
                     <a href="https://universidad.cl" target="_blank" class="btn-enlace" style="background: #27ae60;">📚 Aula Virtual</a>
                 </div>
 
-                <!-- Recuadro Pruebas (Filtrado a 1 mes) -->
                 <div class="seccion-bloque">
-                    <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas</h3>
-                    <div id="contenedor-pruebas">
-                        <div class="msg">Cargando pruebas... </div>
-                    </div>
+                    <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas (Mes)</h3>
+                    <div id="contenedor-pruebas"><div class="msg">Cargando pruebas... 🔄</div></div>
                 </div>
 
-                <!-- Recuadro Turnos (Filtrado a 1 mes) -->
                 <div class="seccion-bloque">
                     <h3 class="titulo-recuadro" style="border-left-color: var(--warning);">🦷 Turnos de Toma Radiográfica</h3>
-                    <div id="contenedor-turnos">
-                        <div class="msg">Cargando turnos... </div>
-                    </div>
+                    <div id="contenedor-turnos"><div class="msg">Cargando turnos... 🔄</div></div>
                 </div>
             </div>
 
         </div>
     </main>
 
-    <!-- PÁGINA 2: ONEDRIVE INCRUSTADO -->
-    <main id="seccion-onedrive" class="pagina-seccion" style="max-width: 1000px; margin: 0 auto; padding: 0 15px;">
-        <div class="contenedor-onedrive">
-            <!-- ⚠️ REEMPLAZA EL LINK DE ABAJO EN EL SRC CON TU ENLACE DE INCRUSTAR DE ONEDRIVE -->
-          <!-- Alternativa forzada si el enlace normal se bloquea -->
-<a href="#" onclick="window.open('https://uandresbelloedu-my.sharepoint.com/personal/d_vonkretschmannsanm_uandresbello_edu/_layouts/15/Doc.aspx?sourcedoc={55afa257-15fa-4681-82aa-e8725fd7a54d}&action=embedview&wdAllowInteractivity=False&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True&wdInConfigurator=True', '_blank'); return false;" class="nav-link">📂 OneDrive</a>
-
+    <!-- PÁGINA 2: VENTANA INCRUSTADA DE ONEDRIVE -->
+    <main id="pag-onedrive" class="pagina-seccion">
+        <div class="iframe-contenedor">
+            <!-- ⚠️ REEMPLAZA ESTA URL DE ABAJO POR TU ENLACE DE INCRUSTACIÓN (EMBED) DE ONEDRIVE -->
+            <iframe src="https://live.com?..." allowfullscreen></iframe>
         </div>
     </main>
 
-    <!-- MENÚ INFERIOR (Solo visible en Celulares) -->
+    <!-- MENÚ INFERIOR (CELULARES) -->
     <nav class="nav-inferior">
-        <button class="btn-tab-inicio activo" onclick="cambiarSeccion('inicio')">📅 Horario</button>
-        <button class="btn-tab-onedrive" onclick="cambiarSeccion('onedrive')">📂 OneDrive</button>
+        <button class="nav-btn activo" onclick="irAPagina('inicio')">📅 Horario</button>
+        <button class="nav-btn" onclick="irAPagina('onedrive')">📂 OneDrive</button>
     </nav>
 
       <script>
