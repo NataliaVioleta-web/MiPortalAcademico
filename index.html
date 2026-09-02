@@ -3,100 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Plataforma Académica</title>
+    <title>Mi Horario y Pruebas</title>
     <style>
         :root {
-            --bg-color: #f4f7f6;
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --bg: #f4f6f7;
             --card-bg: #ffffff;
-            --text-color: #333;
-            --primary: #4a90e2;
-            --accent: #2c3e50;
+            --text: #333333;
         }
-        body { font-family: system-ui, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; }
-        nav { background: var(--accent); padding: 14px; display: flex; justify-content: center; gap: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        nav a { color: white; text-decoration: none; font-weight: bold; font-size: 0.95em; padding: 8px 16px; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
-        nav a:hover { background: rgba(255,255,255,0.2); }
-        .container { max-width: 1100px; margin: 25px auto; padding: 0 20px; }
-        h1, h2 { color: var(--accent); margin-top: 0; }
-        .subtitulo { color: #7f8c8d; font-style: italic; margin-bottom: 20px; font-size: 0.95em; }
-        .workspace { display: flex; gap: 30px; }
-        .col-izquierda { flex: 2; min-width: 0; } 
-        .col-derecha { flex: 1; min-width: 250px; }   
-        .seccion-bloque { margin-bottom: 35px; }
-        .panel-links { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .plataformas-container { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
-        .btn-plataforma { text-align: center; background: var(--primary); color: white; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s; }
-        .btn-plataforma:hover { background: #357abd; }
-        .dia { background: var(--accent); color: white; padding: 10px; border-radius: 6px 6px 0 0; margin-top: 15px; font-weight: bold; }
-        .clase { background: white; padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .clase:last-child { border-radius: 0 0 6px 6px; margin-bottom: 10px; }
-        .bloque { background: #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 0.9em; font-weight: bold; white-space: nowrap; }
-        .info-secundaria { color: #7f8c8d; font-size: 0.85em; margin-top: 4px; line-height: 1.4; }
-        .seccion-pagina { display: none; }
-        .activa { display: block; }
-        .onedrive-wrapper { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 78vh; }
-        iframe { width: 100%; height: 100%; border: none; border-radius: 4px; }
-        .msg { text-align: center; font-style: italic; color: #7f8c8d; margin-top: 20px; }
-        @media (max-width: 768px) { .workspace { flex-direction: column; } .col-derecha { order: -1; } }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding-bottom: 60px;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        h1 { font-size: 1.5rem; margin-bottom: 5px; }
+        h2 { font-size: 1rem; opacity: 0.9; font-weight: 400; }
+
+        /* Navegación Inferior */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            padding: 15px 0;
+            width: 100%;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        nav button.activo {
+            color: var(--primary);
+            border-top: 3px solid var(--primary);
+            background: #f9f9f9;
+        }
+
+        /* Secciones de Página */
+        .seccion-pagina {
+            display: none;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .seccion-pagina.activa {
+            display: block;
+        }
+
+        /* Estilos de Tarjetas (Clases/Pruebas) */
+        .dia {
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            color: var(--primary);
+            font-size: 1.1rem;
+            border-bottom: 2px solid #bdc3c7;
+            padding-bottom: 5px;
+        }
+
+        .clase {
+            background: var(--card-bg);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .info-secundaria {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .bloque {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .msg {
+            text-align: center;
+            padding: 4px;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <nav>
-        <a onclick="cambiarPagina('inicio')">🏠 Inicio</a>
-        <a onclick="cambiarPagina('documentos')">📁 Calendario OneDrive</a>
-    </nav>
-    <div class="container">
-        <!-- PÁGINA 1: INICIO -->
-        <div id="pag-inicio" class="seccion-pagina activa">
-            <div class="workspace">
-                <div class="col-izquierda">
-                    <div class="seccion-bloque">
-                        <h1>📅 Mi Horario Semanal</h1>
-                        <div class="subtitulo" id="rango-semana">Calculando semana...</div>
-                        <div id="horario"><div class="msg">Sincronizando con Google Sheets...</div></div>
-                    </div>
-                    <div class="seccion-bloque">
-                        <h2>🩺 Turnos de Toma Radiológica</h2>
-                        <div id="turnos-contenedor"><div class="msg">Sincronizando turnos...</div></div>
-                    </div>
-                    <div class="seccion-bloque">
-                        <h2>🚨 Próximas Pruebas y Certámenes</h2>
-                        <div id="pruebas-contenedor"><div class="msg">Sincronizando pruebas...</div></div>
-                    </div>
-                </div>
-                <div class="col-derecha">
-                    <div class="panel-links">
-                        <h2>🌐 Accesos Directos</h2>
-                        <div class="subtitulo">Plataformas institucionales</div>
-                        <div class="plataformas-container">
-                            <a href="https://unab.cl" target="_blank" class="btn-plataforma">Intranet UNAB</a>
-                            <a href="https://unab.cl" target="_blank" class="btn-plataforma">Canvas</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- PÁGINA 2: ONEDRIVE -->
-        <div id="pag-documentos" class="seccion-pagina">
-            <h1>📁 Calendario Segundo Semestre</h1>
-            <div class="subtitulo">Visualización protegida en modo lectura</div>
-            <div class="onedrive-wrapper">
-                <iframe src="https://sharepoint.com{55afa257-15fa-4681-82aa-e8725fd7a54d}&action=embedview&wdAllowInteractivity=False&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True"></iframe>
-            </div>
-            <div style="text-align: center; margin: 15px 0;">
-                <a href="https://sharepoint.com" target="_blank" style="display: inline-block; background: #357abd; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; font-size: 1em; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">📱 Enlace directo para celulares</a>
-            </div>
-        </div>
-    </div>
-    <script>
-        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKDrjUcyywiO1WoXtSyhRFevr6lvCkQ1suX374i7kDbs0uu90eCY0efqBPWe_gx932rQ/exec';
 
+    <header>
+        <h1>📚 Mi Portal Académico</h1>
+        <h2 id="rango-semana">Calculando semana...</h2>
+    </header>
+
+    <!-- PÁGINA INICIO (HORARIO) -->
+    <main id="pag-inicio" class="seccion-pagina activa">
+        <div id="contenedor-horario">
+            <div class="msg">Cargando horario... 🔄</div>
+        </div>
+    </main>
+
+    <!-- PÁGINA DOCUMENTOS / PRUEBAS -->
+    <main id="pag-documentos" class="seccion-pagina">
+        <div id="contenedor-pruebas">
+            <div class="msg">Cargando evaluaciones... 🔄</div>
+        </div>
+    </main>
+
+    <!-- MENÚ DE NAVEGACIÓN -->
+    <nav>
+        <button id="btn-inicio" class="activo" onclick="cambiarPagina('inicio')">📅 Horario</button>
+        <button id="btn-documentos" onclick="cambiarPagina('documentos')">📝 Pruebas</button>
+    </nav>
+
+    <script>
+        // ⚠️ REEMPLAZA ESTA URL CON TU ENLACE CORRECTO DE GOOGLE APPS SCRIPT (DEBE TERMINAR EN /exec)
+        const URL_SCRIPT = 'https://google.com';
+
+        // Cambiar entre pestañas
         function cambiarPagina(pagina) {
             document.querySelectorAll('.seccion-pagina').forEach(p => p.classList.remove('activa'));
-            if (pagina === 'inicio') document.getElementById('pag-inicio').classList.add('activa');
-            if (pagina === 'documentos') document.getElementById('pag-documentos').classList.add('activa');
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('activo'));
+
+            if (pagina === 'inicio') {
+                document.getElementById('pag-inicio').classList.add('activa');
+                document.getElementById('btn-inicio').classList.add('activo');
+            }
+            if (pagina === 'documentos') {
+                document.getElementById('pag-documentos').classList.add('activa');
+                document.getElementById('btn-documentos').classList.add('activo');
+            }
         }
 
+        // Calcular rango de la semana actual
         function calcularFechasSemana() {
             const subtituloSemana = document.getElementById('rango-semana');
             if (!subtituloSemana) return;
@@ -110,43 +184,14 @@
             subtituloSemana.innerText = `Semana del ${lunes.getDate()}/${lunes.getMonth()+1} al ${viernes.getDate()}/${viernes.getMonth()+1}`;
         }
 
+        // Renderizar el HTML dinámicamente basándose en la lista de Sheets
         function generarBloquesHtml(lista) {
-            // 1. Ejecutar funciones automáticas al cargar la página
-document.addEventListener("DOMContentLoaded", () => {
-    calcularFechasSemana(); // Calcula los días de la semana actual
-    cargarDatosDesdeSheets(); // Llama a Google Sheets para traer tu horario
-});
-
-// 2. Función para conectar con Google Sheets y cargar los datos
-async function cargarDatosDesdeSheets() {
-    const contenedor = document.getElementById('contenedor-horario'); // Asegúrate de que este ID exista en tu HTML
-    if (!contenedor) return;
-
-    contenedor.innerHTML = '<div class="msg">Cargando horario... 🔄</div>';
-
-    try {
-        // Hace la petición a tu URL de Google Apps Script
-        const respuesta = await fetch(URL_SCRIPT);
-        const datos = await respuesta.json();
-
-        // Pasa los datos de la planilla a tu función generadora de HTML
-        // Nota: Asegúrate de si tu script devuelve un array directo o un objeto como datos.clases
-        const listaClases = Array.isArray(datos) ? datos : (datos.clases || datos.data || []);
-        
-        contenedor.innerHTML = generarBloquesHtml(listaClases);
-
-    } catch (error) {
-        console.error("Error al obtener datos:", error);
-        contenedor.innerHTML = '<div class="msg" style="color: red;">⚠️ Error al cargar el horario. Revisa la consola.</div>';
-    }
-}
             if (!lista || lista.length === 0) return '<div class="msg">No hay registros disponibles.</div>';
             
             let html = '';
             let ultimoDiaRegistrado = '';
 
             lista.forEach(item => {
-                // 1. Forzar lectura exacta de tus columnas en minúsculas (el script de Sheets las pasa así)
                 let fechaOriginal = item.fecha || '';
                 let hora = item.hora || '--:--';
                 let lugar = item.lugar || '';
@@ -154,31 +199,24 @@ async function cargarDatosDesdeSheets() {
                 let actividad = item.actividad || '';
                 let encargado = item.encargado || '';
 
-                // Si la celda de fecha viene vacía por fila combinada, usamos la última fecha válida
                 if (fechaOriginal.trim() !== '') {
                     ultimoDiaRegistrado = fechaOriginal;
                 }
                 
                 let diaMostrar = ultimoDiaRegistrado || 'Sin Fecha';
 
-                // 2. Crear el encabezado del día si cambia la fecha respecto a la fila anterior
-                // Si la fila viene completamente vacía (sin actividad ni ramo), la ignoramos
                 if (!ramo && !actividad) return;
 
-                // Verificar si es una nueva sección de día
-                // Convertimos el formato para verificar cortes visuales limpios
-                if (fechaOriginal.trim() !== '' && html.indexOf(`<div class="dia">${diaMostrar}</div>`) === -1) {
+                if (fechaOriginal.trim() !== '' && html.indexOf(`<div class="dia">📅 ${diaMostrar}</div>`) === -1) {
                     html += `<div class="dia">📅 ${diaMostrar}</div>`;
                 } else if (fechaOriginal.trim() === '' && html === '') {
-                    // Resguardo por si la primera fila empieza vacía
                     html += `<div class="dia">📅 ${diaMostrar}</div>`;
                 }
 
-                // 3. Construir la tarjeta con tus campos reales
                 html += `
-                    <div class="clase" style="border-left: 4px solid var(--primary); padding-left: 15px; margin-bottom: 2px;">
+                    <div class="clase" style="border-left: 4px solid var(--primary); padding-left: 15px; margin-bottom: 8px;">
                         <div style="flex: 1; padding-right: 15px;">
-                            <strong style="color: var(--accent); font-size: 1.05em;">${ramo}</strong>
+                            <strong style="color: var(--primary); font-size: 1.05em;">${ramo}</strong>
                             <div style="margin: 4px 0; font-weight: 500; color: #333;">${actividad}</div>
                             <div class="info-secundaria">
                                 📍 <strong>Lugar:</strong> ${lugar} | 👤 <strong>Docente:</strong> ${encargado}
@@ -191,3 +229,38 @@ async function cargarDatosDesdeSheets() {
 
             return html || '<div class="msg">No hay registros disponibles.</div>';
         }
+
+        // Conexión con la API de Google Sheets
+        async function cargarDatosDesdeSheets() {
+            const contenedorHorario = document.getElementById('contenedor-horario');
+            const contenedorPruebas = document.getElementById('contenedor-pruebas');
+
+            try {
+                const respuesta = await fetch(URL_SCRIPT);
+                if (!respuesta.ok) throw new Error("Error en respuesta de red (404/500)");
+                
+                const datos = await respuesta.json();
+
+                // Adaptar el formato si viene directo en array o anidado
+                const listaClases = Array.isArray(datos) ? datos : (datos.clases || datos.data || []);
+
+                // Rellenamos ambas pestañas con los datos filtrados/procesados
+                contenedorHorario.innerHTML = generarBloquesHtml(listaClases);
+                contenedorPruebas.innerHTML = generarBloquesHtml(listaClases.filter(i => String(i.actividad).toLowerCase().includes('prueba') || String(i.actividad).toLowerCase().includes('examen')));
+
+            } catch (error) {
+                console.error("Error al obtener datos:", error);
+                const msgError = '<div class="msg" style="color: red;">⚠️ Error al cargar datos. Revisa la URL del script o los permisos de publicación en Sheets.</div>';
+                if(contenedorHorario) contenedorHorario.innerHTML = msgError;
+                if(contenedorPruebas) contenedorPruebas.innerHTML = msgError;
+            }
+        }
+
+        // Arrancar la app al cargar el documento
+        document.addEventListener("DOMContentLoaded", () => {
+            calcularFechasSemana();
+            cargarDatosDesdeSheets();
+        });
+    </script>
+</body>
+</html>
