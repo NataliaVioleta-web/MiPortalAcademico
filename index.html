@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Horario y Pruebas</title>
     <style>
+        .seccion-bloque {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.titulo-recuadro {
+    font-size: 1.2rem;
+    color: var(--primary);
+    margin-bottom: 15px;
+    padding-left: 10px;
+    border-left: 4px solid var(--primary);
+}
         :root {
             --primary: #2c3e50;
             --accent: #e74c3c;
@@ -131,18 +144,38 @@
         <h2 id="rango-semana">Calculando semana...</h2>
     </header>
 
-    <!-- PÁGINA INICIO (HORARIO) -->
+        <!-- PÁGINA INICIO (TODO UNIFICADO EN LA PRIMERA HOJA) -->
     <main id="pag-inicio" class="seccion-pagina activa">
-        <div id="contenedor-horario">
-            <div class="msg">Cargando horario... 🔄</div>
+        
+        <!-- SECCIÓN 1: HORARIO SEMANAL -->
+        <div class="seccion-bloque">
+            <h3 class="titulo-recuadro">📅 Mi Horario Semanal</h3>
+            <div id="contenedor-horario">
+                <div class="msg">Cargando horario... 🔄</div>
+            </div>
         </div>
+
+        <!-- SECCIÓN 2: PRÓXIMAS PRUEBAS -->
+        <div class="seccion-bloque" style="margin-top: 25px;">
+            <h3 class="titulo-recuadro" style="border-left-color: #e74c3c;">📝 Próximas Pruebas</h3>
+            <div id="contenedor-pruebas-inicio">
+                <div class="msg">Cargando pruebas... 🔄</div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 3: TURNOS DE TOMA RADIOGRÁFICA -->
+        <div class="seccion-bloque" style="margin-top: 25px;">
+            <h3 class="titulo-recuadro" style="border-left-color: #f1c40f;">🦷 Turnos de Toma Radiográfica</h3>
+            <div id="contenedor-turnos">
+                <div class="msg">Cargando turnos... 🔄</div>
+            </div>
+        </div>
+
     </main>
 
-    <!-- PÁGINA DOCUMENTOS / PRUEBAS -->
+    <!-- PÁGINA DOCUMENTOS (Por si la usas luego, la dejamos oculta abajo) -->
     <main id="pag-documentos" class="seccion-pagina">
-        <div id="contenedor-pruebas">
-            <div class="msg">Cargando evaluaciones... 🔄</div>
-        </div>
+        <div class="msg">Sección de respaldo o apuntes.</div>
     </main>
 
     <!-- MENÚ DE NAVEGACIÓN -->
@@ -232,31 +265,105 @@
 
         // Conexión con la API de Google Sheets
                // Conexión con la API de Google Sheets adaptada a tus 3 pestañas
+               // Conexión con la API y distribución en la primera hoja
         async function cargarDatosDesdeSheets() {
             const contenedorHorario = document.getElementById('contenedor-horario');
-            const contenedorPruebas = document.getElementById('contenedor-pruebas');
+            const contenedorPruebas = document.getElementById('contenedor-pruebas-inicio');
+            const contenedorTurnos = document.getElementById('contenedor-turnos');
 
             try {
                 const respuesta = await fetch(URL_SCRIPT);
-                if (!respuesta.ok) throw new Error("Error en respuesta de red (404/500)");
+                if (!respuesta.ok) throw new Error("Error en respuesta de red");
                 
                 const datos = await respuesta.json();
 
-                // 1. Cargamos las clases directo en el horario
+                // 1. Renderizar Horario Semanal (Pestaña 'clases')
                 contenedorHorario.innerHTML = generarBloquesHtml(datos.clases);
                 
-                // 2. Cargamos las pruebas en la pestaña de evaluaciones usando los datos de tu hoja 'pruebas'
-                contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas);
+                // 2. Renderizar Próximas Pruebas (Pestaña 'pruebas')
+                contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas, '#e74c3c');
 
-                // Nota: Si quieres renderizar tus 'turnos' en algún lado, puedes usar datos.turnos
+                // 3. Renderizar Turnos Radiográficos (Pestaña 'turnos')
+                contenedorTurnos.innerHTML = generarTurnosHtml(datos.turnos);
 
             } catch (error) {
                 console.error("Error al obtener datos:", error);
-                const msgError = '<div class="msg" style="color: red;">⚠️ Error al cargar datos. Revisa la URL del script o los permisos de publicación en Sheets.</div>';
-                if(contenedorHorario) contenedorHorario.innerHTML = msgError;
-                if(contenedorPruebas) contenedorPruebas.innerHTML = msgError;
+                const msgError = '<div class="msg" style="color: red;">⚠️ Error al cargar este recuadro.</div>';
+                contenedorHorario.innerHTML = msgError;
+                contenedorPruebas.innerHTML = msgError;
+                contenedorTurnos.innerHTML = msgError;
             }
         }
+
+        // Modificamos ligeramente tu función original para aceptar colores personalizados por sección
+        function generarBloquesHtml(lista, colorBorde = '#2c3e50') {
+            if (!lista || lista.length === 0) return '<div class="msg">No hay registros para esta semana.</div>';
+            
+            let html = '';
+            let ultimoDiaRegistrado = '';
+
+            lista.forEach(item => {
+                let fechaOriginal = item.fecha || '';
+                let hora = item.hora || '--:--';
+                let lugar = item.lugar || '';
+                let ramo = item.ramo || 'Actividad';
+                let actividad = item.actividad || '';
+                let encargado = item.encargado || '';
+
+                if (fechaOriginal.trim() !== '') ultimoDiaRegistrado = fechaOriginal;
+                let diaMostrar = ultimoDiaRegistrado || 'Sin Fecha';
+
+                if (!ramo && !actividad) return;
+
+                if (fechaOriginal.trim() !== '' && html.indexOf(`<div class="dia">📅 ${diaMostrar}</div>`) === -1) {
+                    html += `<div class="dia" style="color: ${colorBorde}; border-bottom-color: ${colorBorde}33;">📅 ${diaMostrar}</div>`;
+                }
+
+                html += `
+                    <div class="clase" style="border-left: 4px solid ${colorBorde}; padding-left: 15px; margin-bottom: 8px;">
+                        <div style="flex: 1; padding-right: 15px;">
+                            <strong style="color: #2c3e50; font-size: 1.05em;">${ramo}</strong>
+                            <div style="margin: 4px 0; font-weight: 500; color: #555;">${actividad}</div>
+                            <div class="info-secundaria">
+                                📍 <strong>Lugar:</strong> ${lugar} | 👤 <strong>Docente:</strong> ${encargado}
+                            </div>
+                        </div>
+                        <div class="bloque" style="background: ${colorBorde}; color: white;">${hora}</div>
+                    </div>
+                `;
+            });
+
+            return html;
+        }
+
+        // Nueva función exclusiva para diseñar visualmente tus turnos radiográficos
+        function generarTurnosHtml(lista) {
+            if (!lista || lista.length === 0) return '<div class="msg">No tienes turnos radiográficos asignados.</div>';
+            
+            let html = '';
+            lista.forEach(item => {
+                // Mapea los nombres de tus columnas de la pestaña 'turnos'
+                let fecha = item.fecha || 'Sin fecha';
+                let hora = item.hora || 'Todo el día';
+                let grupo = item.grupo || item.equipo || '';
+                let clinica = item.clinica || item.lugar || 'Clínica Radiológica';
+                let detalles = item.detalles || item.observaciones || '';
+
+                html += `
+                    <div class="clase" style="border-left: 4px solid #f1c40f; padding-left: 15px; margin-bottom: 8px; background: #fdfefe;">
+                        <div style="flex: 1;">
+                            <span style="font-size: 0.85rem; font-weight: bold; color: #f39c12; background: #fef9e7; padding: 2px 8px; border-radius: 4px;">📅 ${fecha} (${hora})</span>
+                            <div style="margin: 6px 0 2px 0; font-weight: 600; color: #2c3e50;">${clinica}</div>
+                            <div class="info-secundaria">
+                                👥 <strong>Asignación:</strong> ${grupo} ${detalles ? `| 📝 ${detalles}` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            return html;
+        }
+
 
         // Arrancar la app al cargar el documento
         document.addEventListener("DOMContentLoaded", () => {
