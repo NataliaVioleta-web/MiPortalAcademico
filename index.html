@@ -231,6 +231,7 @@
         }
 
         // Conexión con la API de Google Sheets
+               // Conexión con la API de Google Sheets adaptada a tus 3 pestañas
         async function cargarDatosDesdeSheets() {
             const contenedorHorario = document.getElementById('contenedor-horario');
             const contenedorPruebas = document.getElementById('contenedor-pruebas');
@@ -241,12 +242,13 @@
                 
                 const datos = await respuesta.json();
 
-                // Adaptar el formato si viene directo en array o anidado
-                const listaClases = Array.isArray(datos) ? datos : (datos.clases || datos.data || []);
+                // 1. Cargamos las clases directo en el horario
+                contenedorHorario.innerHTML = generarBloquesHtml(datos.clases);
+                
+                // 2. Cargamos las pruebas en la pestaña de evaluaciones usando los datos de tu hoja 'pruebas'
+                contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas);
 
-                // Rellenamos ambas pestañas con los datos filtrados/procesados
-                contenedorHorario.innerHTML = generarBloquesHtml(listaClases);
-                contenedorPruebas.innerHTML = generarBloquesHtml(listaClases.filter(i => String(i.actividad).toLowerCase().includes('prueba') || String(i.actividad).toLowerCase().includes('examen')));
+                // Nota: Si quieres renderizar tus 'turnos' en algún lado, puedes usar datos.turnos
 
             } catch (error) {
                 console.error("Error al obtener datos:", error);
