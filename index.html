@@ -266,7 +266,7 @@
     <main id="pag-onedrive" class="pagina-seccion">
         <div class="iframe-contenedor">
             <!-- ⚠️ REEMPLAZA ESTA URL DE ABAJO POR TU ENLACE DE INCRUSTACIÓN (EMBED) DE ONEDRIVE -->
-           <iframe width="402" height="346" frameborder="0" scrolling="no" src="https://uandresbelloedu-my.sharepoint.com/personal/d_vonkretschmannsanm_uandresbello_edu/_layouts/15/Doc.aspx?sourcedoc={55afa257-15fa-4681-82aa-e8725fd7a54d}&action=embedview&wdAllowInteractivity=False&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True&wdInConfigurator=True"></iframe>
+            <iframe src="https://uandresbelloedu-my.sharepoint.com/personal/d_vonkretschmannsanm_uandresbello_edu/_layouts/15/Doc.aspx?sourcedoc={55afa257-15fa-4681-82aa-e8725fd7a54d}&action=embedview&wdAllowInteractivity=False&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True&wdInConfigurator=True" allowfullscreen></iframe>
         </div>
     </main>
 
@@ -280,6 +280,21 @@
         const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKDrjUcyywiO1WoXtSyhRFevr6lvCkQ1suX374i7kDbs0uu90eCY0efqBPWe_gx932rQ/exec';
 
         let fechaLunes, fechaDomingo;
+
+        // Función para cambiar de página de forma fluida (tanto en PC como en Celulares)
+        function irAPagina(pagina) {
+            document.querySelectorAll('.pagina-seccion').forEach(p => p.classList.remove('activa'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('activo'));
+
+            if (pagina === 'inicio') {
+                document.getElementById('pag-inicio').classList.add('activa');
+                document.querySelectorAll('button[onclick="irAPagina(\'inicio\')"]').forEach(b => b.classList.add('activo'));
+            }
+            if (pagina === 'onedrive') {
+                document.getElementById('pag-onedrive').classList.add('activa');
+                document.querySelectorAll('button[onclick="irAPagina(\'onedrive\')"]').forEach(b => b.classList.add('activo'));
+            }
+        }
 
         function calcularFechasSemana() {
             const subtituloSemana = document.getElementById('rango-semana');
@@ -301,28 +316,26 @@
         function interpretarFecha(textoFecha) {
             if (!textoFecha) return null;
             let stringFecha = String(textoFecha).trim();
-            if (stringFecha.includes('T')) stringFecha = stringFecha.split('T')[0];
+            if (stringFecha.includes('T')) stringFecha = stringFecha.split('T');
             
             stringFecha = stringFecha.replace(/\//g, '-');
             const partes = stringFecha.split('-');
             if (partes.length !== 3) return null;
 
-            let anio = parseInt(partes[0], 10);
-            let mes = parseInt(partes[1], 10) - 1;
-            let dia = parseInt(partes[2], 10);
+            let anio = parseInt(partes, 10);
+            let mes = parseInt(partes, 10) - 1;
+            let dia = parseInt(partes, 10);
 
-            if (anio < 1000) { // Formato dd-mm-aaaa
-                dia = parseInt(partes[0], 10);
-                mes = parseInt(partes[1], 10) - 1;
-                anio = parseInt(partes[2], 10);
+            if (anio < 1000) {
+                dia = parseInt(partes, 10);
+                mes = parseInt(partes, 10) - 1;
+                anio = parseInt(partes, 10);
             }
             return new Date(anio, mes, dia);
         }
 
-        // Procesa la lista rellenando celdas combinadas vacías
         function normalizarLista(lista) {
             if (!lista || !Array.isArray(lista)) return [];
-            
             let ultimaFechaValida = "";
             let filasEstandarizadas = [];
 
@@ -332,55 +345,43 @@
                     nuevoObj[key.toLowerCase().trim()] = String(item[key]).trim();
                 });
 
-                // Si la fecha viene vacía por celda combinada, hereda la última fecha del día
-                if (nuevoObj.fecha && nuevoObj.fecha !== "") {
-                    ultimaFechaValida = nuevoObj.fecha;
-                } else {
-                    nuevoObj.fecha = ultimaFechaValida;
-                }
+                if (nuevoObj.fecha && nuevoObj.fecha !== "") ultimaFechaValida = nuevoObj.fecha;
+                else nuevoObj.fecha = ultimaFechaValida;
 
-                // Extrae los datos reales usando tus nombres de columnas
                 nuevoObj.hora = nuevoObj.hora || nuevoObj.horario || '--:--';
                 nuevoObj.lugar = nuevoObj.lugar || nuevoObj.sala || 'Por definir';
                 nuevoObj.ramo = nuevoObj.ramo || nuevoObj.asignatura || '';
-                nuevoObj.actividad = nuevoObj.actividad || nuevoObj.detalle || nuevoObj.observaciones || '';
-                nuevoObj.encargado = nuevoObj.encargado || nuevoObj.docente || nuevoObj.profesor || '';
+                nuevoObj.actividad = nuevoObj.actividad || nuevoObj.detalle || '';
+                nuevoObj.encargado = nuevoObj.encargado || nuevoObj.docente || '';
 
-                // Solo guardamos la fila si tiene contenido real (actividad, ramo o encargado)
                 if (nuevoObj.actividad !== "" || nuevoObj.ramo !== "" || nuevoObj.encargado !== "") {
                     filasEstandarizadas.push(nuevoObj);
                 }
             });
-
             return filasEstandarizadas;
         }
 
-                function generarBloquesHtml(lista, colorBorde = '#2c3e50', mostrarTodoElSemestre = false) {
+        function generarBloquesHtml(lista, colorBorde = '#2c3e50', mostrarUnMes = false) {
             let listaLimpia = normalizarLista(lista);
-            if (listaLimpia.length === 0) return '<div class="msg">No hay registros en tu Google Sheets.</div>';
+            if (listaLimpia.length === 0) return '<div class="msg">No hay registros programados.</div>';
 
             const hoy = new Date();
             hoy.setHours(0,0,0,0);
 
-            // CORREGIDO: Calculamos exactamente el límite de 1 mes (30 días en el futuro)
             const unMesDespues = new Date(hoy);
             unMesDespues.setDate(hoy.getDate() + 30);
-            unMesDespues.setHours(23,59,59,999);
 
-            if (mostrarTodoElSemestre) {
-                // Filtra para que aparezcan SOLO los eventos entre hoy y dentro de 30 días exactos
+            if (mostrarUnMes) {
                 listaLimpia = listaLimpia.filter(item => {
                     let f = interpretarFecha(item.fecha);
                     return f && f >= hoy && f <= unMesDespues;
                 }).sort((a, b) => interpretarFecha(a.fecha) - interpretarFecha(b.fecha));
             } else {
-                // Para el Horario: Filtra las clases de esta semana en curso
                 let listaSemanal = listaLimpia.filter(item => {
                     let f = interpretarFecha(item.fecha);
                     return f && f >= fechaLunes && f <= fechaDomingo;
                 });
 
-                // Si tu horario de esta semana está vacío, muestra de forma automática lo que viene en el mes
                 if (listaSemanal.length === 0) {
                     listaLimpia = listaLimpia.filter(item => {
                         let f = interpretarFecha(item.fecha);
@@ -391,9 +392,7 @@
                 }
             }
 
-            if (listaLimpia.length === 0) {
-                return '<div class="msg">No hay próximas actividades programadas para este mes.</div>';
-            }
+            if (listaLimpia.length === 0) return '<div class="msg">No hay actividades programadas para este mes.</div>';
 
             let html = '';
             let ultimoDiaRegistrado = '';
@@ -402,7 +401,6 @@
                 let fObj = interpretarFecha(item.fecha);
                 let diaMostrar = fObj ? `${fObj.getDate()}/${fObj.getMonth()+1}/${fObj.getFullYear()}` : item.fecha;
 
-                               // CORREGIDO: Forzamos a que el texto de la fecha sea siempre azul
                 if (diaMostrar !== ultimoDiaRegistrado) {
                     html += `<div class="dia" style="color: #2c3e50;">📅 ${diaMostrar}</div>`;
                     ultimoDiaRegistrado = diaMostrar;
@@ -412,7 +410,7 @@
                     <div class="clase" style="border-left: 4px solid ${colorBorde}; margin-bottom: 8px;">
                         <div style="flex: 1; padding-right: 15px;">
                             <strong style="color: #2c3e50; font-size: 1.05em;">${item.ramo ? item.ramo : (colorBorde === '#f1c40f' ? 'Turno Clínico' : 'Asignación')}</strong>
-                            <div style="margin: 4px 0; font-weight: 500; color: #444; font-size:0.95em;">${item.actividad}</div>
+                            <div style="margin: 3px 0; font-weight: 500; color: #555; font-size:0.95em;">${item.actividad}</div>
                             <div class="info-secundaria">
                                 📍 <strong>Lugar:</strong> ${item.lugar} ${item.encargado ? `| 👤 <strong>Docente:</strong> ${item.encargado}` : ''}
                             </div>
@@ -421,10 +419,8 @@
                     </div>
                 `;
             });
-
             return html;
         }
-
 
         async function cargarDatosDesdeSheets() {
             const contenedorHorario = document.getElementById('contenedor-horario');
@@ -443,7 +439,7 @@
 
             } catch (error) {
                 console.error("Error:", error);
-                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar con Google Sheets.</div>';
+                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar.</div>';
                 contenedorHorario.innerHTML = msgError;
                 contenedorPruebas.innerHTML = msgError;
                 contenedorTurnos.innerHTML = msgError;
@@ -457,3 +453,4 @@
     </script>
 </body>
 </html>
+
