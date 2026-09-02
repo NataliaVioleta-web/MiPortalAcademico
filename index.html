@@ -121,14 +121,14 @@
         </div>
 
         <div class="seccion-bloque">
-            <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas</h3>
+            <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas (3 Semanas)</h3>
             <div id="contenedor-pruebas">
                 <div class="msg">Cargando pruebas... 🔄</div>
             </div>
         </div>
 
         <div class="seccion-bloque">
-            <h3 class="titulo-recuadro" style="border-left-color: var(--warning);">🦷 Turnos de Toma Radiográfica</h3>
+            <h3 class="titulo-recuadro" style="border-left-color: var(--warning);">🦷 Turnos de Toma Radiográfica (3 Semanas)</h3>
             <div id="contenedor-turnos">
                 <div class="msg">Cargando turnos... 🔄</div>
             </div>
@@ -155,13 +155,13 @@
             fechaDomingo.setHours(23,59,59,999);
 
             fechaLimiteTresSemanas = new Date(fechaLunes);
-            fechaLimiteTresSemanas.setDate(fechaLunes.getDate() + 20); // 21 días de intervalo
+            fechaLimiteTresSemanas.setDate(fechaLunes.getDate() + 20); 
             fechaLimiteTresSemanas.setHours(23,59,59,999);
 
             subtituloSemana.innerText = `Semana del ${fechaLunes.getDate()}/${fechaLunes.getMonth()+1} al ${fechaDomingo.getDate()}/${fechaDomingo.getMonth()+1}`;
         }
 
-        // Lector corregido y ultra robusto para evitar colapsos
+        // Procesador inteligente a prueba de fallos
         function interpretarFecha(textoFecha) {
             if (!textoFecha) return null;
             let stringFecha = String(textoFecha).trim();
@@ -176,12 +176,12 @@
             
             if (partes.length !== 3) return null;
 
-            let anio, mes, dia;
-            if (partes[0].length === 4) { // yyyy-mm-dd
-                anio = parseInt(partes[0], 10);
-                mes = parseInt(partes[1], 10) - 1;
-                dia = parseInt(partes[2], 10);
-            } else { // dd-mm-yyyy
+            let anio = parseInt(partes[0], 10);
+            let mes = parseInt(partes[1], 10) - 1;
+            let dia = parseInt(partes[2], 10);
+
+            // Si el formato viene al revés (dd/mm/yyyy) reacomoda los valores de forma automática
+            if (anio < 1000) {
                 dia = parseInt(partes[0], 10);
                 mes = parseInt(partes[1], 10) - 1;
                 anio = parseInt(partes[2], 10);
@@ -224,7 +224,7 @@
             });
         }
 
-                        function generarBloquesHtml(lista, colorBorde = '#2c3e50', usarTresSemanas = false) {
+        function generarBloquesHtml(lista, colorBorde = '#2c3e50', usarTresSemanas = false) {
             const listaFiltrada = usarTresSemanas ? filtrarTresSemanas(lista) : filtrarSoloEstaSemana(lista);
             if (listaFiltrada.length === 0) return '<div class="msg">No hay registros programados.</div>';
             
@@ -236,19 +236,18 @@
                 let hora = item.hora || '--:--';
                 let lugar = item.lugar || '';
                 let ramo = item.ramo || 'Actividad';
-                let actividad = item.actividad || '';
-                let encargado = item.encargado || '';
+                
+                // Mapeo automático multinombre para Actividad y Docente
+                let actividad = item.actividad || item.detalle || item.actividades || '';
+                let encargado = item.encargado || item.docente || item.profesor || '';
 
                 if (fechaOriginal.trim() !== '') ultimoDiaRegistrado = fechaOriginal;
                 let diaMostrar = ultimoDiaRegistrado || 'Sin Fecha';
-
-                if (!ramo && !actividad) return;
 
                 if (fechaOriginal.trim() !== '' && html.indexOf(`style="color: ${colorBorde};">📅 ${diaMostrar}</div>`) === -1) {
                     html += `<div class="dia" style="color: ${colorBorde};">📅 ${diaMostrar}</div>`;
                 }
 
-                // Renderizado limpio de tus 6 columnas confirmadas
                 html += `
                     <div class="clase" style="border-left: 4px solid ${colorBorde};">
                         <div style="flex: 1; padding-right: 15px;">
@@ -265,8 +264,6 @@
 
             return html;
         }
-
-
 
         function generarTurnosHtml(lista) {
             const listaFiltrada = filtrarTresSemanas(lista);
@@ -324,6 +321,9 @@
             cargarDatosDesdeSheets();
         });
     </script>
+</body>
+</html>
+
 </body>
 </html>
 
