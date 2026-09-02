@@ -135,10 +135,10 @@
         </div>
 
     </div>
-    <script>
-        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKDrjUcyywiO1WoXtSyhRFevr6lvCkQ1suX374i7kDbs0uu90eCY0efqBPWe_gx932rQ/exec';
+        <script>
+        const URL_SCRIPT = 'https://google.com';
 
-        let fechaLunes, fechaDomingo, fechaLimiteTresSemanas;
+        let fechaLunes, fechaDomingo;
 
         function calcularFechasSemana() {
             const subtituloSemana = document.getElementById('rango-semana');
@@ -154,14 +154,10 @@
             fechaDomingo.setDate(fechaLunes.getDate() + 6);
             fechaDomingo.setHours(23,59,59,999);
 
-            fechaLimiteTresSemanas = new Date(fechaLunes);
-            fechaLimiteTresSemanas.setDate(fechaLunes.getDate() + 20); 
-            fechaLimiteTresSemanas.setHours(23,59,59,999);
-
             subtituloSemana.innerText = `Semana del ${fechaLunes.getDate()}/${fechaLunes.getMonth()+1} al ${fechaDomingo.getDate()}/${fechaDomingo.getMonth()+1}`;
         }
 
-        // Procesador inteligente a prueba de fallos
+        // Lector universal ultra-corregido para soportar YYYY/MM/DD nativo de tus tablas
         function interpretarFecha(textoFecha) {
             if (!textoFecha) return null;
             let stringFecha = String(textoFecha).trim();
@@ -170,9 +166,9 @@
                 stringFecha = stringFecha.split('T')[0];
             }
             
-            let partes = [];
-            if (stringFecha.includes('-')) partes = stringFecha.split('-');
-            else if (stringFecha.includes('/')) partes = stringFecha.split('/');
+            // Reemplaza todas las barras por guiones para estandarizar
+            stringFecha = stringFecha.replace(/\//g, '-');
+            const partes = stringFecha.split('-');
             
             if (partes.length !== 3) return null;
 
@@ -180,7 +176,7 @@
             let mes = parseInt(partes[1], 10) - 1;
             let dia = parseInt(partes[2], 10);
 
-            // Si el formato viene al revés (dd/mm/yyyy) reacomoda los valores de forma automática
+            // Resguardo por si el formato viene invertido (dd-mm-yyyy)
             if (anio < 1000) {
                 dia = parseInt(partes[0], 10);
                 mes = parseInt(partes[1], 10) - 1;
@@ -192,42 +188,32 @@
 
         function filtrarSoloEstaSemana(lista) {
             if (!lista || !Array.isArray(lista)) return [];
-            let ultimoDiaValido = null;
-
             return lista.filter(item => {
-                let fechaTexto = (item.fecha || '').trim();
-                if (fechaTexto !== '') ultimoDiaValido = fechaTexto;
-                
-                let fechaEvaluar = interpretarFecha(fechaTexto !== '' ? fechaTexto : ultimoDiaValido);
+                let fechaEvaluar = interpretarFecha(item.fecha);
                 if (!fechaEvaluar) return false;
-
                 return fechaEvaluar >= fechaLunes && fechaEvaluar <= fechaDomingo;
             });
         }
 
-        function filtrarTresSemanas(lista) {
-            if (!lista || !Array.isArray(lista)) return [];
-            let ultimoDiaValido = null;
+        function generarBloquesHtml(lista, colorBorde = '#2c3e50', mostrarTodoElSemestre = false) {
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
 
-            return lista.filter(item => {
-                let fechaTexto = (item.fecha || '').trim();
-                if (fechaTexto !== '') ultimoDiaValido = fechaTexto;
-                
-                let fechaEvaluar = interpretarFecha(fechaTexto !== '' ? fechaTexto : ultimoDiaValido);
-                if (!fechaEvaluar) return false;
+            let listaFiltrada = mostrarTodoElSemestre ? lista : filtrarSoloEstaSemana(lista);
+            if (!listaFiltrada || listaFiltrada.length === 0) return '<div class="msg">No hay registros programados.</div>';
 
-                const evalFecha = new Date(fechaEvaluar).setHours(0,0,0,0);
-                const inicioLunes = new Date(fechaLunes).setHours(0,0,0,0);
-                const finSubsiguiente = new Date(fechaLimiteTresSemanas).setHours(23,59,59,999);
+            // Si es vista semestral, filtramos lo antiguo y ordenamos cronológicamente de menor a mayor
+            if (mostrarTodoElSemestre) {
+                listaFiltrada = listaFiltrada.filter(item => {
+                    let f = interpretarFecha(item.fecha);
+                    return f && f >= hoy; // Solo muestra eventos desde hoy hacia el futuro
+                }).sort((a, b) => {
+                    return interpretarFecha(a.fecha) - interpretarFecha(b.fecha);
+                });
+            }
 
-                return evalFecha >= inicioLunes && evalFecha <= finSubsiguiente;
-            });
-        }
+            if (listaFiltrada.length === 0) return '<div class="msg">No hay próximas actividades programadas en este bloque.</div>';
 
-        function generarBloquesHtml(lista, colorBorde = '#2c3e50', usarTresSemanas = false) {
-            const listaFiltrada = usarTresSemanas ? filtrarTresSemanas(lista) : filtrarSoloEstaSemana(lista);
-            if (listaFiltrada.length === 0) return '<div class="msg">No hay registros programados.</div>';
-            
             let html = '';
             let ultimoDiaRegistrado = '';
 
@@ -235,23 +221,22 @@
                 let fechaOriginal = item.fecha || '';
                 let hora = item.hora || '--:--';
                 let lugar = item.lugar || '';
-                let ramo = item.ramo || 'Actividad';
-                
-                // Mapeo automático multinombre para Actividad y Docente
-                let actividad = item.actividad || item.detalle || item.actividades || '';
-                let encargado = item.encargado || item.docente || item.profesor || '';
+                let ramo = item.ramo || '';
+                let actividad = item.actividad || '';
+                let encargado = item.encargado || '';
 
-                if (fechaOriginal.trim() !== '') ultimoDiaRegistrado = fechaOriginal;
-                let diaMostrar = ultimoDiaRegistrado || 'Sin Fecha';
+                let fechaObjeto = interpretarFecha(fechaOriginal);
+                let diaMostrar = fechaObjeto ? `${fechaObjeto.getDate()}/${fechaObjeto.getMonth()+1}/${fechaObjeto.getFullYear()}` : fechaOriginal;
 
-                if (fechaOriginal.trim() !== '' && html.indexOf(`style="color: ${colorBorde};">📅 ${diaMostrar}</div>`) === -1) {
+                if (diaMostrar !== ultimoDiaRegistrado) {
                     html += `<div class="dia" style="color: ${colorBorde};">📅 ${diaMostrar}</div>`;
+                    ultimoDiaRegistrado = diaMostrar;
                 }
 
                 html += `
                     <div class="clase" style="border-left: 4px solid ${colorBorde};">
                         <div style="flex: 1; padding-right: 15px;">
-                            <strong style="color: #2c3e50; font-size: 1.05em;">${ramo}</strong>
+                            <strong style="color: #2c3e50; font-size: 1.05em;">${ramo ? ramo : 'Turno Clínico'}</strong>
                             <div style="margin: 3px 0; font-weight: 500; color: #555; font-size:0.95em;">${actividad}</div>
                             <div class="info-secundaria">
                                 📍 <strong>Lugar:</strong> ${lugar} ${encargado ? `| 👤 <strong>Docente:</strong> ${encargado}` : ''}
@@ -262,33 +247,6 @@
                 `;
             });
 
-            return html;
-        }
-
-        function generarTurnosHtml(lista) {
-            const listaFiltrada = filtrarTresSemanas(lista);
-            if (listaFiltrada.length === 0) return '<div class="msg">No tienes turnos asignados para estas 3 semanas.</div>';
-            
-            let html = '';
-            listaFiltrada.forEach(item => {
-                let fecha = item.fecha || 'Sin fecha';
-                let hora = item.hora || 'Todo el día';
-                let grupo = item.grupo || item.equipo || '';
-                let clinica = item.clinica || item.lugar || 'Clínica Radiológica';
-                let detalles = item.detalles || item.observaciones || '';
-
-                html += `
-                    <div class="clase" style="border-left: 4px solid var(--warning);">
-                        <div style="flex: 1;">
-                            <span style="font-size: 0.8rem; font-weight: bold; color: #d35400; background: #fef9e7; padding: 2px 8px; border-radius: 4px;">📅 ${fecha} (${hora})</span>
-                            <div style="margin: 5px 0 2px 0; font-weight: 600; color: #2c3e50;">${clinica}</div>
-                            <div class="info-secundaria">
-                                👥 <strong>Asignación:</strong> ${grupo} ${detalles ? `| 📝 ${detalles}` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
             return html;
         }
 
@@ -303,13 +261,18 @@
                 
                 const datos = await respuesta.json();
 
+                // 1. Horario de clases enfocado estrictamente en la semana actual
                 contenedorHorario.innerHTML = generarBloquesHtml(datos.clases, '#2c3e50', false);
+                
+                // 2. Próximas pruebas ordenadas para todo lo que queda del semestre (Vista Extendida)
                 contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas, '#e74c3c', true);
-                contenedorTurnos.innerHTML = generarTurnosHtml(datos.turnos);
+                
+                // 3. Turnos Clínicos radiográficos usando tus columnas exactas para todo el semestre (Vista Extendida)
+                contenedorTurnos.innerHTML = generarBloquesHtml(datos.turnos, '#f1c40f', true);
 
             } catch (error) {
                 console.error("Error:", error);
-                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar.</div>';
+                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar con Google Sheets.</div>';
                 contenedorHorario.innerHTML = msgError;
                 contenedorPruebas.innerHTML = msgError;
                 contenedorTurnos.innerHTML = msgError;
@@ -321,9 +284,3 @@
             cargarDatosDesdeSheets();
         });
     </script>
-</body>
-</html>
-
-</body>
-</html>
-
