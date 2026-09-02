@@ -162,11 +162,10 @@
             subtituloSemana.innerText = `Semana del ${fechaLunes.getDate()}/${fechaLunes.getMonth()+1} al ${fechaDomingo.getDate()}/${fechaDomingo.getMonth()+1}`;
         }
 
-                       function interpretarFecha(textoFecha) {
+            function interpretarFecha(textoFecha) {
             if (!textoFecha) return null;
             let stringFecha = String(textoFecha).trim();
             
-            // Si viene con hora ISO de Google (ej: 2026-09-02T04:00:00.000Z), extrae solo el texto de la fecha
             if (stringFecha.includes('T')) {
                 stringFecha = stringFecha.split('T')[0];
             }
@@ -178,10 +177,26 @@
                     if (partes[0].length === 4) { // yyyy-mm-dd
                         return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
                     } else { // dd-mm-yyyy
-                        return new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
+                        return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
                     }
                 }
             }
+            
+            // 2. Formato con barras (Día/Mes/Año o Año/Mes/Día)
+            if (stringFecha.includes('/')) {
+                const partes = stringFecha.split('/');
+                if (partes.length === 3) {
+                    if (partes[0].length === 4) { // yyyy/mm/dd
+                        return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+                    } else { // dd/mm/yyyy
+                        return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+                    }
+                }
+            }
+            
+            return null;
+        }
+
             
             // 2. Formato con barras (Día/Mes/Año o Año/Mes/Día)
             if (stringFecha.includes('/')) {
@@ -215,7 +230,7 @@
         }
 
         // Nuevo filtro extendido para Pruebas y Turnos (Esta semana + Próxima + Subsiguiente)
-        function filtrarTresSemanas(lista) {
+              function filtrarTresSemanas(lista) {
             if (!lista || !Array.isArray(lista)) return [];
             let ultimoDiaValido = null;
 
@@ -226,11 +241,15 @@
                 let fechaEvaluar = interpretarFecha(fechaTexto !== '' ? fechaTexto : ultimoDiaValido);
                 if (!fechaEvaluar) return false;
 
-                // Acepta registros desde el lunes actual hasta el domingo de la subsiguiente semana
-                return fechaEvaluar >= fechaLunes && fechaEvaluar <= fechaLimiteTresSemanas;
+                // Ponemos las horas en cero para comparar limpiamente solo días
+                const evalFecha = new Date(fechaEvaluar).setHours(0,0,0,0);
+                const inicioLunes = new Date(fechaLunes).setHours(0,0,0,0);
+                const finSubsiguiente = new Date(fechaLimiteTresSemanas).setHours(23,59,59,999);
+
+                return evalFecha >= inicioLunes && evalFecha <= finSubsiguiente;
             });
         }
-
+        
                function generarBloquesHtml(lista, colorBorde = '#2c3e50', usarTresSemanas = false) {
             // Si el parámetro usarTresSemanas es verdadero, usa el filtro extendido
             const listaFiltrada = usarTresSemanas ? filtrarTresSemanas(lista) : filtrarSoloEstaSemana(lista);
