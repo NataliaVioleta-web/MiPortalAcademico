@@ -39,10 +39,24 @@
         h1 { font-size: 1.6rem; margin-bottom: 6px; }
         h2 { font-size: 1rem; opacity: 0.9; font-weight: 400; }
 
+        /* Contenedor en dos columnas para computadoras */
         .contenedor-principal {
-            max-width: 650px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 0 15px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .columna-izquierda {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .columna-derecha {
+            display: flex;
+            flex-direction: column;
         }
 
         .seccion-bloque {
@@ -50,7 +64,7 @@
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .titulo-recuadro {
@@ -102,6 +116,36 @@
             color: #7f8c8d;
             font-style: italic;
         }
+
+        .btn-enlace {
+            display: block;
+            text-align: center;
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .btn-enlace:hover {
+            filter: brightness(0.9);
+        }
+
+        /* DISEÑO RESPONSIVO: Si se abre en celulares, vuelve a una sola columna */
+        @media (max-width: 768px) {
+            .contenedor-principal {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            /* En celular pasamos los enlaces arriba para que no queden al final del todo */
+            .columna-derecha {
+                order: -1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -112,43 +156,50 @@
     </header>
 
     <div class="contenedor-principal">
-                <!-- RECUADRO DE ENLACES DE ACCESO DIRECTO -->
-        <div class="seccion-bloque" style="background: #eaf2f8; border: 1px solid #d4e6f1;">
-            <h3 class="titulo-recuadro" style="border-left-color: #2980b9; color: #2980b9;">🔗 Accesos Directos U</h3>
-            <div style="display: flex; gap: 12px; margin-top: 10px;">
-                <!-- BOTÓN 1: Reemplaza '#' con el enlace real de tu primera plataforma -->
-                <a href="https://portal2.unab.cl/ingresar-al-portal" target="_blank" style="flex: 1; text-align: center; background: #2980b9; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s;">
+        
+        <!-- COLUMNA IZQUIERDA (Horario, Pruebas y Turnos) -->
+        <div class="columna-izquierda">
+            <div class="seccion-bloque">
+                <h3 class="titulo-recuadro" style="border-left-color: var(--primary);">📅 Mi Horario Semanal</h3>
+                <div id="contenedor-horario">
+                    <div class="msg">Cargando horario... 🔄</div>
+                </div>
+            </div>
+
+            <div class="seccion-bloque">
+                <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas (Mes)</h3>
+                <div id="contenedor-pruebas">
+                    <div class="msg">Cargando pruebas... 🔄</div>
+                </div>
+            </div>
+
+            <div class="seccion-bloque">
+                <h3 class="titulo-recuadro" style="border-left-color: var(--warning);">🦷 Turnos de Toma Radiográfica</h3>
+                <div id="contenedor-turnos">
+                    <div class="msg">Cargando turnos... 🔄</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA (Accesos Directos al lado derecho) -->
+        <div class="columna-derecha">
+            <div class="seccion-bloque" style="background: #eaf2f8; border: 1px solid #d4e6f1; position: sticky; top: 20px;">
+                <h3 class="titulo-recuadro" style="border-left-color: #2980b9; color: #2980b9; margin-bottom: 20px;">🔗 Accesos Directos</h3>
+                
+                <!-- BOTÓN 1: Cambia el enlace por el tuyo -->
+                <a href="https://portal2.unab.cl/ingresar-al-portal" target="_blank" class="btn-enlace" style="background: #2980b9;">
                     🌐 Portal Alumno
                 </a>
-                <!-- BOTÓN 2: Reemplaza '#' con el enlace real de tu segunda plataforma -->
-                <a href="https://canvas.unab.cl/" target="_blank" style="flex: 1; text-align: center; background: #27ae60; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s;">
+                
+                <!-- BOTÓN 2: Cambia el enlace por el tuyo -->
+                <a href="https://canvas.unab.cl/" target="_blank" class="btn-enlace" style="background: #27ae60;">
                     📚 Canvas
                 </a>
             </div>
         </div>
-        
-        <div class="seccion-bloque">
-            <h3 class="titulo-recuadro" style="border-left-color: var(--primary);">📅 Mi Horario Semanal</h3>
-            <div id="contenedor-horario">
-                <div class="msg">Cargando horario... 🔄</div>
-            </div>
-        </div>
-
-        <div class="seccion-bloque">
-            <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas (Semestre)</h3>
-            <div id="contenedor-pruebas">
-                <div class="msg">Cargando pruebas... 🔄</div>
-            </div>
-        </div>
-
-        <div class="seccion-bloque">
-            <h3 class="titulo-recuadro" style="border-left-color: var(--warning);">🦷 Turnos de Toma Radiográfica</h3>
-            <div id="contenedor-turnos">
-                <div class="msg">Cargando turnos... 🔄</div>
-            </div>
-        </div>
 
     </div>
+
       <script>
         const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKDrjUcyywiO1WoXtSyhRFevr6lvCkQ1suX374i7kDbs0uu90eCY0efqBPWe_gx932rQ/exec';
 
