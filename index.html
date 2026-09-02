@@ -161,7 +161,7 @@
             subtituloSemana.innerText = `Semana del ${fechaLunes.getDate()}/${fechaLunes.getMonth()+1} al ${fechaDomingo.getDate()}/${fechaDomingo.getMonth()+1}`;
         }
 
-        // Lector universal robusto para procesar el formato YYYY/MM/DD e YYYY-MM-DD nativos de tus tablas
+                // CORREGIDO: Lector universal exacto que no fallará con tus datos
         function interpretarFecha(textoFecha) {
             if (!textoFecha) return null;
             let stringFecha = String(textoFecha).trim();
@@ -170,16 +170,20 @@
                 stringFecha = stringFecha.split('T')[0];
             }
             
+            // Reemplaza barras por guiones para homogeneizar el formato
             stringFecha = stringFecha.replace(/\//g, '-');
             const partes = stringFecha.split('-');
             
             if (partes.length !== 3) return null;
 
-            let anio = parseInt(partes[0], 10);
-            let mes = parseInt(partes[1], 10) - 1;
-            let dia = parseInt(partes[2], 10);
-
-            if (anio < 1000) {
+            let anio, mes, dia;
+            
+            // Si el primer elemento tiene 4 dígitos (ej: 2026-09-24)
+            if (partes[0].length === 4) { 
+                anio = parseInt(partes[0], 10);
+                mes = parseInt(partes[1], 10) - 1;
+                dia = parseInt(partes[2], 10);
+            } else { // Si viene en formato tradicional (dd-mm-yyyy)
                 dia = parseInt(partes[0], 10);
                 mes = parseInt(partes[1], 10) - 1;
                 anio = parseInt(partes[2], 10);
@@ -187,6 +191,7 @@
 
             return new Date(anio, mes, dia);
         }
+
 
         function filtrarSoloEstaSemana(lista) {
             if (!lista || !Array.isArray(lista)) return [];
