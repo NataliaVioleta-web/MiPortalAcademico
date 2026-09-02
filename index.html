@@ -138,7 +138,7 @@
     <script>
         const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKDrjUcyywiO1WoXtSyhRFevr6lvCkQ1suX374i7kDbs0uu90eCY0efqBPWe_gx932rQ/exec';
 
-        let fechaLunes, fechaDomingo;
+               let fechaLunes, fechaDomingo, fechaLimiteTresSemanas;
 
         function calcularFechasSemana() {
             const subtituloSemana = document.getElementById('rango-semana');
@@ -153,6 +153,11 @@
             fechaDomingo = new Date(fechaLunes);
             fechaDomingo.setDate(fechaLunes.getDate() + 6);
             fechaDomingo.setHours(23,59,59,999);
+
+            // Calculamos el domingo de la subsiguiente semana (2 semanas más después de esta)
+            fechaLimiteTresSemanas = new Date(fechaLunes);
+            fechaLimiteTresSemanas.setDate(fechaLunes.getDate() + 20); // 21 días en total
+            fechaLimiteTresSemanas.setHours(23,59,59,999);
 
             subtituloSemana.innerText = `Semana del ${fechaLunes.getDate()}/${fechaLunes.getMonth()+1} al ${fechaDomingo.getDate()}/${fechaDomingo.getMonth()+1}`;
         }
@@ -193,16 +198,14 @@
             return null;
         }
 
+                // Filtro estricto para el Horario (semana actual)
         function filtrarSoloEstaSemana(lista) {
             if (!lista || !Array.isArray(lista)) return [];
             let ultimoDiaValido = null;
 
             return lista.filter(item => {
                 let fechaTexto = (item.fecha || '').trim();
-                
-                if (fechaTexto !== '') {
-                    ultimoDiaValido = fechaTexto;
-                }
+                if (fechaTexto !== '') ultimoDiaValido = fechaTexto;
                 
                 let fechaEvaluar = interpretarFecha(fechaTexto !== '' ? fechaTexto : ultimoDiaValido);
                 if (!fechaEvaluar) return false;
@@ -211,9 +214,27 @@
             });
         }
 
-        function generarBloquesHtml(lista, colorBorde = '#2c3e50') {
-            const listaFiltrada = filtrarSoloEstaSemana(lista);
-            if (listaFiltrada.length === 0) return '<div class="msg">No hay registros programados para esta semana.</div>';
+        // Nuevo filtro extendido para Pruebas y Turnos (Esta semana + Próxima + Subsiguiente)
+        function filtrarTresSemanas(lista) {
+            if (!lista || !Array.isArray(lista)) return [];
+            let ultimoDiaValido = null;
+
+            return lista.filter(item => {
+                let fechaTexto = (item.fecha || '').trim();
+                if (fechaTexto !== '') ultimoDiaValido = fechaTexto;
+                
+                let fechaEvaluar = interpretarFecha(fechaTexto !== '' ? fechaTexto : ultimoDiaValido);
+                if (!fechaEvaluar) return false;
+
+                // Acepta registros desde el lunes actual hasta el domingo de la subsiguiente semana
+                return fechaEvaluar >= fechaLunes && fechaEvaluar <= fechaLimiteTresSemanas;
+            });
+        }
+
+               function generarBloquesHtml(lista, colorBorde = '#2c3e50', usarTresSemanas = false) {
+            // Si el parámetro usarTresSemanas es verdadero, usa el filtro extendido
+            const listaFiltrada = usarTresSemanas ? filtrarTresSemanas(lista) : filtrarSoloEstaSemana(lista);
+            if (listaFiltrada.length === 0) return '<div class="msg">No hay registros programados para este período.</div>';
             
             let html = '';
             let ultimoDiaRegistrado = '';
@@ -241,8 +262,7 @@
                             <strong style="color: #2c3e50; font-size: 1.05em;">${ramo}</strong>
                             <div style="margin: 3px 0; font-weight: 500; color: #555; font-size:0.95em;">${actividad}</div>
                             <div class="info-secundaria">
-                               📍 <strong>Lugar:</strong> ${lugar} ${encargado ? `| 👤 <strong>Docente:</strong> ${encargado}` : ''}
-
+                                📍 <strong>Lugar:</strong> ${lugar} ${encargado ? `| 👤 <strong>Docente:</strong> ${encargado}` : ''}
                             </div>
                         </div>
                         <div class="bloque" style="background: ${colorBorde}; color: white;">${hora}</div>
@@ -252,6 +272,35 @@
 
             return html;
         }
+
+        function generarTurnosHtml(lista) {
+            // Cambiado a filtrarTresSemanas para que muestre los turnos del periodo extendido
+            const listaFiltrada = filtrarTresSemanas(lista);
+            if (listaFiltrada.length === 0) return '<div class="msg">No tienes turnos radiográficos asignados para estas 3 semanas.</div>';
+            
+            let html = '';
+            listaFiltrada.forEach(item => {
+                let fecha = item.fecha || 'Sin fecha';
+                let hora = item.hora || 'Todo el día';
+                let grupo = item.grupo || item.equipo || '';
+                let clinica = item.clinica || item.lugar || 'Clínica Radiológica';
+                let detalles = item.detalles || item.observaciones || '';
+
+                html += `
+                    <div class="clase" style="border-left: 4px solid var(--warning);">
+                        <div style="flex: 1;">
+                            <span style="font-size: 0.8rem; font-weight: bold; color: #d35400; background: #fef9e7; padding: 2px 8px; border-radius: 4px;">📅 ${fecha} (${hora})</span>
+                            <div style="margin: 5px 0 2px 0; font-weight: 600; color: #2c3e50;">${clinica}</div>
+                            <div class="info-secundaria">
+                                👥 <strong>Asignación:</strong> ${grupo} ${detalles ? `| 📝 ${detalles}` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            return html;
+        }
+
 
         function generarTurnosHtml(lista) {
             const listaFiltrada = filtrarSoloEstaSemana(lista);
@@ -280,7 +329,7 @@
             return html;
         }
 
-        async function cargarDatosDesdeSheets() {
+                async function cargarDatosDesdeSheets() {
             const contenedorHorario = document.getElementById('contenedor-horario');
             const contenedorPruebas = document.getElementById('contenedor-pruebas');
             const contenedorTurnos = document.getElementById('contenedor-turnos');
@@ -291,8 +340,13 @@
                 
                 const datos = await respuesta.json();
 
-                contenedorHorario.innerHTML = generarBloquesHtml(datos.clases, '#2c3e50');
-                contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas, '#e74c3c');
+                // Horario: Solo esta semana (falso/por defecto)
+                contenedorHorario.innerHTML = generarBloquesHtml(datos.clases, '#2c3e50', false);
+                
+                // Pruebas: Rango de 3 semanas (activamos pasando true)
+                contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas, '#e74c3c', true);
+                
+                // Turnos: Modificado internamente para 3 semanas
                 contenedorTurnos.innerHTML = generarTurnosHtml(datos.turnos);
 
             } catch (error) {
