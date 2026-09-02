@@ -113,6 +113,7 @@
 
     <div class="contenedor-principal">
         
+        <!-- Bloque 1: Horario de la semana actual -->
         <div class="seccion-bloque">
             <h3 class="titulo-recuadro" style="border-left-color: var(--primary);">📅 Mi Horario Semanal</h3>
             <div id="contenedor-horario">
@@ -120,24 +121,26 @@
             </div>
         </div>
 
+        <!-- Bloque 2: Calendario semestral de Pruebas futuras -->
         <div class="seccion-bloque">
-            <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas (3 Semanas)</h3>
+            <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas (Semestre)</h3>
             <div id="contenedor-pruebas">
                 <div class="msg">Cargando pruebas... 🔄</div>
             </div>
         </div>
 
+        <!-- Bloque 3: Asignaciones y Turnos clínicos futuros -->
         <div class="seccion-bloque">
-            <h3 class="titulo-recuadro" style="border-left-color: var(--warning);">🦷 Turnos de Toma Radiográfica (3 Semanas)</h3>
+            <h3 class="titulo-recuadro" style="border-left-color: var(--warning);">🦷 Turnos de Toma Radiográfica</h3>
             <div id="contenedor-turnos">
                 <div class="msg">Cargando turnos... 🔄</div>
             </div>
         </div>
 
     </div>
-            <script>
-        // URL de tu API de Google Apps Script
-        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKDrjUcyywiO1WoXtSyhRFevr6lvCkQ1suX374i7kDbs0uu90eCY0efqBPWe_gx932rQ/exec';
+    <script>
+        // Dirección de conexión con tu Google Apps Script de Sheets
+        const URL_SCRIPT = 'https://google.com';
 
         let fechaLunes, fechaDomingo;
 
@@ -158,7 +161,7 @@
             subtituloSemana.innerText = `Semana del ${fechaLunes.getDate()}/${fechaLunes.getMonth()+1} al ${fechaDomingo.getDate()}/${fechaDomingo.getMonth()+1}`;
         }
 
-        // Lector universal preparado para soportar el formato YYYY/MM/DD de tus celdas
+        // Lector universal robusto para procesar el formato YYYY/MM/DD e YYYY-MM-DD nativos de tus tablas
         function interpretarFecha(textoFecha) {
             if (!textoFecha) return null;
             let stringFecha = String(textoFecha).trim();
@@ -167,7 +170,6 @@
                 stringFecha = stringFecha.split('T')[0];
             }
             
-            // Reemplaza barras por guiones para homogeneizar el formato
             stringFecha = stringFecha.replace(/\//g, '-');
             const partes = stringFecha.split('-');
             
@@ -177,7 +179,6 @@
             let mes = parseInt(partes[1], 10) - 1;
             let dia = parseInt(partes[2], 10);
 
-            // Resguardo por si el formato viene invertido (dd-mm-yyyy)
             if (anio < 1000) {
                 dia = parseInt(partes[0], 10);
                 mes = parseInt(partes[1], 10) - 1;
@@ -203,11 +204,10 @@
             let listaFiltrada = mostrarTodoElSemestre ? lista : filtrarSoloEstaSemana(lista);
             if (!listaFiltrada || listaFiltrada.length === 0) return '<div class="msg">No hay registros programados.</div>';
 
-            // Si es vista semestral extendida, filtramos lo antiguo y ordenamos cronológicamente
             if (mostrarTodoElSemestre) {
                 listaFiltrada = listaFiltrada.filter(item => {
                     let f = interpretarFecha(item.fecha);
-                    return f && f >= hoy; // Solo muestra eventos vigentes desde hoy en adelante
+                    return f && f >= hoy; 
                 }).sort((a, b) => {
                     return interpretarFecha(a.fecha) - interpretarFecha(b.fecha);
                 });
@@ -262,18 +262,18 @@
                 
                 const datos = await respuesta.json();
 
-                // 1. Horario de clases: Solo lo que cae en la semana en curso
+                // 1. Horario enfocado estrictamente en la semana actual (31 de agosto al 6 de septiembre de 2026)
                 contenedorHorario.innerHTML = generarBloquesHtml(datos.clases, '#2c3e50', false);
                 
-                // 2. Próximas pruebas ordenadas para todo el semestre restante
+                // 2. Pruebas listadas cronológicamente para el resto del semestre
                 contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas, '#e74c3c', true);
                 
-                // 3. Turnos Radiográficos ordenados para todo el semestre restante con tus columnas reales
+                // 3. Turnos listados cronológicamente mapeando tus columnas de alumnos asignados
                 contenedorTurnos.innerHTML = generarBloquesHtml(datos.turnos, '#f1c40f', true);
 
             } catch (error) {
                 console.error("Error:", error);
-                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar con Google Sheets.</div>';
+                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar con Google Sheets. Revisa la URL o la caché.</div>';
                 contenedorHorario.innerHTML = msgError;
                 contenedorPruebas.innerHTML = msgError;
                 contenedorTurnos.innerHTML = msgError;
@@ -287,42 +287,3 @@
     </script>
 </body>
 </html>
-
-
-            return html;
-        }
-
-        async function cargarDatosDesdeSheets() {
-            const contenedorHorario = document.getElementById('contenedor-horario');
-            const contenedorPruebas = document.getElementById('contenedor-pruebas');
-            const contenedorTurnos = document.getElementById('contenedor-turnos');
-
-            try {
-                const respuesta = await fetch(URL_SCRIPT);
-                if (!respuesta.ok) throw new Error("Error de red");
-                
-                const datos = await respuesta.json();
-
-                // 1. Horario de clases enfocado estrictamente en la semana actual
-                contenedorHorario.innerHTML = generarBloquesHtml(datos.clases, '#2c3e50', false);
-                
-                // 2. Próximas pruebas ordenadas para todo lo que queda del semestre (Vista Extendida)
-                contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas, '#e74c3c', true);
-                
-                // 3. Turnos Clínicos radiográficos usando tus columnas exactas para todo el semestre (Vista Extendida)
-                contenedorTurnos.innerHTML = generarBloquesHtml(datos.turnos, '#f1c40f', true);
-
-            } catch (error) {
-                console.error("Error:", error);
-                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar con Google Sheets.</div>';
-                contenedorHorario.innerHTML = msgError;
-                contenedorPruebas.innerHTML = msgError;
-                contenedorTurnos.innerHTML = msgError;
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            calcularFechasSemana();
-            cargarDatosDesdeSheets();
-        });
-    </script>
