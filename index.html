@@ -135,8 +135,7 @@
         </div>
 
     </div>
-    <script>
-        // ⚠️ INGRESA AQUÍ ABAJO TU URL ACTUALIZADA DE GOOGLE APPS SCRIPT (LA QUE OBTENGAS EN EL PASO DE ABAJO)
+      <script>
         const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKDrjUcyywiO1WoXtSyhRFevr6lvCkQ1suX374i7kDbs0uu90eCY0efqBPWe_gx932rQ/exec';
 
         let fechaLunes, fechaDomingo;
@@ -158,100 +157,105 @@
             subtituloSemana.innerText = `Semana del ${fechaLunes.getDate()}/${fechaLunes.getMonth()+1} al ${fechaDomingo.getDate()}/${fechaDomingo.getMonth()+1}`;
         }
 
-        // VERSIÓN MATEMÁTICA REAL: Diseñada para tu formato exacto aaaa-mm-dd
         function interpretarFecha(textoFecha) {
             if (!textoFecha) return null;
             let stringFecha = String(textoFecha).trim();
+            if (stringFecha.includes('T')) stringFecha = stringFecha.split('T')[0];
             
-            // Si Google Sheets envía el texto con la hora ISO adjunta, la limpiamos
-            if (stringFecha.includes('T')) {
-                stringFecha = stringFecha.split('T')[0];
-            }
-            
-            // Homogeneizamos barras por guiones por seguridad
             stringFecha = stringFecha.replace(/\//g, '-');
             const partes = stringFecha.split('-');
-            
             if (partes.length !== 3) return null;
 
-            // Extraemos las posiciones reales del arreglo dividido
             let anio = parseInt(partes[0], 10);
-            let mes = parseInt(partes[1], 10) - 1; // En JS los meses van de 0 a 11
+            let mes = parseInt(partes[1], 10) - 1;
             let dia = parseInt(partes[2], 10);
 
-            // Resguardo de seguridad por si alguna fila viniera al revés (dd-mm-aaaa)
-            if (anio < 1000) {
+            if (anio < 1000) { // Formato dd-mm-aaaa
                 dia = parseInt(partes[0], 10);
                 mes = parseInt(partes[1], 10) - 1;
                 anio = parseInt(partes[2], 10);
             }
-
-            const fechaResultado = new Date(anio, mes, dia);
-            return isNaN(fechaResultado.getTime()) ? null : fechaResultado;
+            return new Date(anio, mes, dia);
         }
 
-        function filtrarSoloEstaSemana(lista) {
+        // Procesa la lista rellenando celdas combinadas vacías
+        function normalizarLista(lista) {
             if (!lista || !Array.isArray(lista)) return [];
-            return lista.filter(item => {
-                let fechaEvaluar = interpretarFecha(item.fecha);
-                return fechaEvaluar && fechaEvaluar >= fechaLunes && fechaEvaluar <= fechaDomingo;
-            });
-        }
-        // VERSIÓN INTELIGENTE: Lee las columnas sin importar mayúsculas, minúsculas o espacios
-        function generarBloquesHtml(lista, colorBorde = '#2c3e50', mostrarTodoElSemestre = false) {
-            if (!lista || !Array.isArray(lista) || lista.length === 0) {
-                return '<div class="msg">No hay registros programados para este período.</div>';
-            }
+            
+            let ultimaFechaValida = "";
+            let filasEstandarizadas = [];
 
-            // 1. Limpiamos y estandarizamos las propiedades de cada fila para evitar vacíos
-            let listaProcesada = lista.map(item => {
+            lista.forEach(item => {
                 let nuevoObj = {};
-                // Pasa todas las propiedades a minúsculas limpias
                 Object.keys(item).forEach(key => {
-                    nuevoObj[key.toLowerCase().trim()] = item[key];
+                    nuevoObj[key.toLowerCase().trim()] = String(item[key]).trim();
                 });
-                return nuevoObj;
-            }).filter(item => {
-                let fechaTexto = String(item.fecha || '').trim();
-                let actTexto = String(item.actividad || item.ramo || '').trim();
-                return fechaTexto !== '' || actTexto !== '';
+
+                // Si la fecha viene vacía por celda combinada, hereda la última fecha del día
+                if (nuevoObj.fecha && nuevoObj.fecha !== "") {
+                    ultimaFechaValida = nuevoObj.fecha;
+                } else {
+                    nuevoObj.fecha = ultimaFechaValida;
+                }
+
+                // Extrae los datos reales usando tus nombres de columnas
+                nuevoObj.hora = nuevoObj.hora || nuevoObj.horario || '--:--';
+                nuevoObj.lugar = nuevoObj.lugar || nuevoObj.sala || 'Por definir';
+                nuevoObj.ramo = nuevoObj.ramo || nuevoObj.asignatura || '';
+                nuevoObj.actividad = nuevoObj.actividad || nuevoObj.detalle || nuevoObj.observaciones || '';
+                nuevoObj.encargado = nuevoObj.encargado || nuevoObj.docente || nuevoObj.profesor || '';
+
+                // Solo guardamos la fila si tiene contenido real (actividad, ramo o encargado)
+                if (nuevoObj.actividad !== "" || nuevoObj.ramo !== "" || nuevoObj.encargado !== "") {
+                    filasEstandarizadas.push(nuevoObj);
+                }
             });
 
-            if (listaProcesada.length === 0) {
-                return '<div class="msg">No hay actividades programadas.</div>';
-            }
+            return filasEstandarizadas;
+        }
 
-            // 2. Ordenar cronológicamente si es vista semestral
+        function generarBloquesHtml(lista, colorBorde = '#2c3e50', mostrarTodoElSemestre = false) {
+            let listaLimpia = normalizarLista(lista);
+            if (listaLimpia.length === 0) return '<div class="msg">No hay registros en tu Google Sheets.</div>';
+
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+
             if (mostrarTodoElSemestre) {
-                listaProcesada.sort((a, b) => {
-                    let fA = interpretarFecha(a.fecha);
-                    let fB = interpretarFecha(b.fecha);
-                    if (!fA) return 1;
-                    if (!fB) return -1;
-                    return fA - fB;
-                });
+                // Para Pruebas y Turnos: filtra lo antiguo y ordena cronológicamente hacia adelante
+                listaLimpia = listaLimpia.filter(item => {
+                    let f = interpretarFecha(item.fecha);
+                    return f && f >= hoy;
+                }).sort((a, b) => interpretarFecha(a.fecha) - interpretarFecha(b.fecha));
             } else {
-                listaProcesada = filtrarSoloEstaSemana(listaProcesada);
+                // Para el Horario: Filtra estrictamente las clases de esta semana en curso
+                let listaSemanal = listaLimpia.filter(item => {
+                    let f = interpretarFecha(item.fecha);
+                    return f && f >= fechaLunes && f <= fechaDomingo;
+                });
+
+                // TRUCO INTELIGENTE: Si tu horario de esta semana está vacío (porque es septiembre y tus clases son de agosto),
+                // te muestra de forma automática todas tus clases futuras del semestre para que no se vea en blanco.
+                if (listaSemanal.length === 0) {
+                    listaLimpia = listaLimpia.filter(item => {
+                        let f = interpretarFecha(item.fecha);
+                        return f && f >= hoy;
+                    }).sort((a, b) => interpretarFecha(a.fecha) - interpretarFecha(b.fecha));
+                } else {
+                    listaLimpia = listaSemanal;
+                }
             }
 
-            if (listaProcesada.length === 0) {
-                return '<div class="msg">No hay actividades para esta semana.</div>';
+            if (listaLimpia.length === 0) {
+                return '<div class="msg">No hay próximas actividades programadas en este bloque.</div>';
             }
 
             let html = '';
             let ultimoDiaRegistrado = '';
 
-            listaProcesada.forEach(item => {
-                // Extractor tolerante multinombre
-                let fechaOriginal = item.fecha || '';
-                let hora = item.hora || item.horario || '--:--';
-                let lugar = item.lugar || item.sala || '';
-                let ramo = item.ramo || item.asignatura || '';
-                let actividad = item.actividad || item.detalle || item.observaciones || '';
-                let encargado = item.encargado || item.docente || item.profesor || '';
-
-                let fObj = interpretarFecha(fechaOriginal);
-                let diaMostrar = fObj ? `${fObj.getDate()}/${fObj.getMonth()+1}/${fObj.getFullYear()}` : fechaOriginal;
+            listaLimpia.forEach(item => {
+                let fObj = interpretarFecha(item.fecha);
+                let diaMostrar = fObj ? `${fObj.getDate()}/${fObj.getMonth()+1}/${fObj.getFullYear()}` : item.fecha;
 
                 if (diaMostrar !== ultimoDiaRegistrado) {
                     html += `<div class="dia" style="color: ${colorBorde};">📅 ${diaMostrar}</div>`;
@@ -259,22 +263,21 @@
                 }
 
                 html += `
-                    <div class="clase" style="border-left: 4px solid ${colorBorde}; min-height: 70px; margin-bottom: 8px;">
+                    <div class="clase" style="border-left: 4px solid ${colorBorde}; margin-bottom: 8px;">
                         <div style="flex: 1; padding-right: 15px;">
-                            <strong style="color: #2c3e50; font-size: 1.05em;">${ramo ? ramo : (colorBorde === '#f1c40f' ? 'Turno Clínico' : 'Asignación')}</strong>
-                            <div style="margin: 4px 0; font-weight: 500; color: #444; font-size:0.95em;">${actividad ? actividad : 'Sin detalles'}</div>
+                            <strong style="color: #2c3e50; font-size: 1.05em;">${item.ramo ? item.ramo : (colorBorde === '#f1c40f' ? 'Turno Clínico' : 'Asignación')}</strong>
+                            <div style="margin: 4px 0; font-weight: 500; color: #444; font-size:0.95em;">${item.actividad}</div>
                             <div class="info-secundaria">
-                                📍 <strong>Lugar:</strong> ${lugar ? lugar : 'Por definir'} ${encargado ? `| 👤 <strong>Docente:</strong> ${encargado}` : ''}
+                                📍 <strong>Lugar:</strong> ${item.lugar} ${item.encargado ? `| 👤 <strong>Docente:</strong> ${item.encargado}` : ''}
                             </div>
                         </div>
-                        <div class="bloque" style="background: ${colorBorde}; color: ${colorBorde === '#f1c40f' ? '#2c3e50' : 'white'}; font-weight: bold;">${hora}</div>
+                        <div class="bloque" style="background: ${colorBorde}; color: ${colorBorde === '#f1c40f' ? '#2c3e50' : 'white'}; font-weight: bold;">${item.hora}</div>
                     </div>
                 `;
             });
 
             return html;
         }
-
 
         async function cargarDatosDesdeSheets() {
             const contenedorHorario = document.getElementById('contenedor-horario');
@@ -287,13 +290,8 @@
                 
                 const datos = await respuesta.json();
 
-                // 1. Horario: Solo lo de esta semana
                 contenedorHorario.innerHTML = generarBloquesHtml(datos.clases, '#2c3e50', false);
-                
-                // 2. Pruebas: Todo el semestre hacia adelante
                 contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas, '#e74c3c', true);
-                
-                // 3. CORREGIDO: Cambiamos a 'true' para mostrar todos los turnos futuros del semestre
                 contenedorTurnos.innerHTML = generarBloquesHtml(datos.turnos, '#f1c40f', true);
 
             } catch (error) {
@@ -304,7 +302,6 @@
                 contenedorTurnos.innerHTML = msgError;
             }
         }
-
 
         document.addEventListener("DOMContentLoaded", () => {
             calcularFechasSemana();
