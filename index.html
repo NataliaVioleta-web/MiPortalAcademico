@@ -111,6 +111,35 @@
         }
 
         function generarBloquesHtml(lista) {
+            // 1. Ejecutar funciones automáticas al cargar la página
+document.addEventListener("DOMContentLoaded", () => {
+    calcularFechasSemana(); // Calcula los días de la semana actual
+    cargarDatosDesdeSheets(); // Llama a Google Sheets para traer tu horario
+});
+
+// 2. Función para conectar con Google Sheets y cargar los datos
+async function cargarDatosDesdeSheets() {
+    const contenedor = document.getElementById('contenedor-horario'); // Asegúrate de que este ID exista en tu HTML
+    if (!contenedor) return;
+
+    contenedor.innerHTML = '<div class="msg">Cargando horario... 🔄</div>';
+
+    try {
+        // Hace la petición a tu URL de Google Apps Script
+        const respuesta = await fetch(URL_SCRIPT);
+        const datos = await respuesta.json();
+
+        // Pasa los datos de la planilla a tu función generadora de HTML
+        // Nota: Asegúrate de si tu script devuelve un array directo o un objeto como datos.clases
+        const listaClases = Array.isArray(datos) ? datos : (datos.clases || datos.data || []);
+        
+        contenedor.innerHTML = generarBloquesHtml(listaClases);
+
+    } catch (error) {
+        console.error("Error al obtener datos:", error);
+        contenedor.innerHTML = '<div class="msg" style="color: red;">⚠️ Error al cargar el horario. Revisa la consola.</div>';
+    }
+}
             if (!lista || lista.length === 0) return '<div class="msg">No hay registros disponibles.</div>';
             
             let html = '';
