@@ -157,37 +157,40 @@
             subtituloSemana.innerText = `Semana del ${fechaLunes.getDate()}/${fechaLunes.getMonth()+1} al ${fechaDomingo.getDate()}/${fechaDomingo.getMonth()+1}`;
         }
 
-                function interpretarFecha(textoFecha) {
+                       function interpretarFecha(textoFecha) {
             if (!textoFecha) return null;
-            const stringFecha = String(textoFecha).trim();
+            let stringFecha = String(textoFecha).trim();
             
-            // Si la fecha viene con guiones (yyyy-mm-dd)
+            // Si viene con hora ISO de Google (ej: 2026-09-02T04:00:00.000Z), extrae solo el texto de la fecha
+            if (stringFecha.includes('T')) {
+                stringFecha = stringFecha.split('T')[0];
+            }
+            
+            // 1. Formato con guiones (Año-Mes-Día o Día-Mes-Año)
             if (stringFecha.includes('-')) {
                 const partes = stringFecha.split('-');
                 if (partes.length === 3) {
-                    // Si el año viene primero (4 dígitos)
-                    if (partes[0].length === 4) {
-                        return new Date(partes[0], partes[1] - 1, partes[2]);
+                    if (partes[0].length === 4) { // yyyy-mm-dd
+                        return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+                    } else { // dd-mm-yyyy
+                        return new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
                     }
-                    // Si el día viene primero (dd-mm-yyyy)
-                    return new Date(partes[2], partes[1] - 1, partes[0]);
                 }
             }
             
-            // Si la fecha viene con barras (dd/mm/yyyy o yyyy/mm/dd)
+            // 2. Formato con barras (Día/Mes/Año o Año/Mes/Día)
             if (stringFecha.includes('/')) {
                 const partes = stringFecha.split('/');
                 if (partes.length === 3) {
-                    if (partes[0].length === 4) {
-                        return new Date(partes[0], partes[1] - 1, partes[2]);
+                    if (partes[0].length === 4) { // yyyy/mm/dd
+                        return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+                    } else { // dd/mm/yyyy
+                        return new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
                     }
-                    return new Date(partes[2], partes[1] - 1, partes[0]);
                 }
             }
             
             return null;
-        }
-
         }
 
         function filtrarSoloEstaSemana(lista) {
@@ -238,7 +241,8 @@
                             <strong style="color: #2c3e50; font-size: 1.05em;">${ramo}</strong>
                             <div style="margin: 3px 0; font-weight: 500; color: #555; font-size:0.95em;">${actividad}</div>
                             <div class="info-secundaria">
-                                📍 <strong>Lugar:</strong> ${lugar} ${encargado ? `| 👤 <strong>Docente:</strong> ${encargado}` : ''}
+                               📍 <strong>Lugar:</strong> ${lugar} ${encargado ? `| 👤 <strong>Docente:</strong> ${encargado}` : ''}
+
                             </div>
                         </div>
                         <div class="bloque" style="background: ${colorBorde}; color: white;">${hora}</div>
