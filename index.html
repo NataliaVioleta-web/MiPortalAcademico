@@ -113,7 +113,6 @@
 
     <div class="contenedor-principal">
         
-        <!-- Bloque 1: Horario de la semana actual -->
         <div class="seccion-bloque">
             <h3 class="titulo-recuadro" style="border-left-color: var(--primary);">📅 Mi Horario Semanal</h3>
             <div id="contenedor-horario">
@@ -121,7 +120,6 @@
             </div>
         </div>
 
-        <!-- Bloque 2: Calendario semestral de Pruebas futuras -->
         <div class="seccion-bloque">
             <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas (Semestre)</h3>
             <div id="contenedor-pruebas">
@@ -129,7 +127,6 @@
             </div>
         </div>
 
-        <!-- Bloque 3: Asignaciones y Turnos clínicos futuros -->
         <div class="seccion-bloque">
             <h3 class="titulo-recuadro" style="border-left-color: var(--warning);">🦷 Turnos de Toma Radiográfica</h3>
             <div id="contenedor-turnos">
@@ -139,7 +136,7 @@
 
     </div>
     <script>
-        // Dirección de conexión con tu Google Apps Script de Sheets
+        // ⚠️ INGRESA AQUÍ ABAJO TU URL ACTUALIZADA DE GOOGLE APPS SCRIPT (LA QUE OBTENGAS EN EL PASO DE ABAJO)
         const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKDrjUcyywiO1WoXtSyhRFevr6lvCkQ1suX374i7kDbs0uu90eCY0efqBPWe_gx932rQ/exec';
 
         let fechaLunes, fechaDomingo;
@@ -161,7 +158,7 @@
             subtituloSemana.innerText = `Semana del ${fechaLunes.getDate()}/${fechaLunes.getMonth()+1} al ${fechaDomingo.getDate()}/${fechaDomingo.getMonth()+1}`;
         }
 
-                        // VERSIÓN AUTÓNOMA DEFINITIVA: No usa filtros manuales propensos a errores
+        // Lector universal ultra-corregido matemático para procesar de forma nativa YYYY/MM/DD o YYYY-MM-DD
         function interpretarFecha(textoFecha) {
             if (!textoFecha) return null;
             let stringFecha = String(textoFecha).trim();
@@ -170,33 +167,29 @@
                 stringFecha = stringFecha.split('T')[0];
             }
             
-            // Reemplaza barras por guiones para estandarizar el formato
             stringFecha = stringFecha.replace(/\//g, '-');
+            const partes = stringFecha.split('-');
             
-            // Intenta cargar la fecha de forma nativa directamente en el navegador
-            let fechaNativa = new Date(stringFecha);
-            
-            // Si el formato nativo falla o se invierte, lo procesamos por seguridad
-            if (isNaN(fechaNativa.getTime())) {
-                const partes = stringFecha.split('-');
-                if (partes.length === 3) {
-                    if (partes[0].length === 4) { // yyyy-mm-dd
-                        fechaNativa = new Date(parseInt(partes[0], 10), parseInt(partes[1], 10) - 1, parseInt(partes[2], 10));
-                    } else { // dd-mm-yyyy
-                        fechaNativa = new Date(parseInt(partes[2], 10), parseInt(partes[1], 10) - 1, parseInt(partes[0], 10));
-                    }
-                }
+            if (partes.length !== 3) return null;
+
+            let anio = parseInt(partes[0], 10);
+            let mes = parseInt(partes[1], 10) - 1;
+            let dia = parseInt(partes[2], 10);
+
+            if (anio < 1000) { // Resguardo por si viene como dd-mm-yyyy
+                dia = parseInt(partes[0], 10);
+                mes = parseInt(partes[1], 10) - 1;
+                anio = parseInt(partes[2], 10);
             }
-            
-            return isNaN(fechaNativa.getTime()) ? null : fechaNativa;
+
+            return new Date(anio, mes, dia);
         }
 
         function filtrarSoloEstaSemana(lista) {
             if (!lista || !Array.isArray(lista)) return [];
             return lista.filter(item => {
                 let fechaEvaluar = interpretarFecha(item.fecha);
-                if (!fechaEvaluar) return false;
-                return fechaEvaluar >= fechaLunes && fechaEvaluar <= fechaDomingo;
+                return fechaEvaluar && fechaEvaluar >= fechaLunes && fechaEvaluar <= fechaDomingo;
             });
         }
 
@@ -211,9 +204,7 @@
                 listaFiltrada = listaFiltrada.filter(item => {
                     let f = interpretarFecha(item.fecha);
                     return f && f >= hoy; 
-                }).sort((a, b) => {
-                    return interpretarFecha(a.fecha) - interpretarFecha(b.fecha);
-                });
+                }).sort((a, b) => interpretarFecha(a.fecha) - interpretarFecha(b.fecha));
             }
 
             if (listaFiltrada.length === 0) return '<div class="msg">No hay próximas actividades programadas en este bloque.</div>';
@@ -240,7 +231,7 @@
                 html += `
                     <div class="clase" style="border-left: 4px solid ${colorBorde};">
                         <div style="flex: 1; padding-right: 15px;">
-                            <strong style="color: #2c3e50; font-size: 1.05em;">${ramo ? ramo : 'Asignación'}</strong>
+                            <strong style="color: #2c3e50; font-size: 1.05em;">${ramo && ramo !== '-' ? ramo : 'Asignación'}</strong>
                             <div style="margin: 3px 0; font-weight: 500; color: #555; font-size:0.95em;">${actividad}</div>
                             <div class="info-secundaria">
                                 📍 <strong>Lugar:</strong> ${lugar} ${encargado ? `| 👤 <strong>Docente:</strong> ${encargado}` : ''}
@@ -265,18 +256,13 @@
                 
                 const datos = await respuesta.json();
 
-                // 1. Horario enfocado estrictamente en la semana actual (31 de agosto al 6 de septiembre de 2026)
                 contenedorHorario.innerHTML = generarBloquesHtml(datos.clases, '#2c3e50', false);
-                
-                // 2. Pruebas listadas cronológicamente para el resto del semestre
                 contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas, '#e74c3c', true);
-                
-                // 3. Turnos listados cronológicamente mapeando tus columnas de alumnos asignados
                 contenedorTurnos.innerHTML = generarBloquesHtml(datos.turnos, '#f1c40f', true);
 
             } catch (error) {
                 console.error("Error:", error);
-                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar con Google Sheets. Revisa la URL o la caché.</div>';
+                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar con Google Sheets. Revisa la URL.</div>';
                 contenedorHorario.innerHTML = msgError;
                 contenedorPruebas.innerHTML = msgError;
                 contenedorTurnos.innerHTML = msgError;
