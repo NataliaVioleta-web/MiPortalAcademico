@@ -161,7 +161,7 @@
             subtituloSemana.innerText = `Semana del ${fechaLunes.getDate()}/${fechaLunes.getMonth()+1} al ${fechaDomingo.getDate()}/${fechaDomingo.getMonth()+1}`;
         }
 
-                // CORREGIDO: Lector universal exacto que no fallará con tus datos
+                        // VERSIÓN AUTÓNOMA DEFINITIVA: No usa filtros manuales propensos a errores
         function interpretarFecha(textoFecha) {
             if (!textoFecha) return null;
             let stringFecha = String(textoFecha).trim();
@@ -170,28 +170,26 @@
                 stringFecha = stringFecha.split('T')[0];
             }
             
-            // Reemplaza barras por guiones para homogeneizar el formato
+            // Reemplaza barras por guiones para estandarizar el formato
             stringFecha = stringFecha.replace(/\//g, '-');
-            const partes = stringFecha.split('-');
             
-            if (partes.length !== 3) return null;
-
-            let anio, mes, dia;
+            // Intenta cargar la fecha de forma nativa directamente en el navegador
+            let fechaNativa = new Date(stringFecha);
             
-            // Si el primer elemento tiene 4 dígitos (ej: 2026-09-24)
-            if (partes[0].length === 4) { 
-                anio = parseInt(partes[0], 10);
-                mes = parseInt(partes[1], 10) - 1;
-                dia = parseInt(partes[2], 10);
-            } else { // Si viene en formato tradicional (dd-mm-yyyy)
-                dia = parseInt(partes[0], 10);
-                mes = parseInt(partes[1], 10) - 1;
-                anio = parseInt(partes[2], 10);
+            // Si el formato nativo falla o se invierte, lo procesamos por seguridad
+            if (isNaN(fechaNativa.getTime())) {
+                const partes = stringFecha.split('-');
+                if (partes.length === 3) {
+                    if (partes[0].length === 4) { // yyyy-mm-dd
+                        fechaNativa = new Date(parseInt(partes[0], 10), parseInt(partes[1], 10) - 1, parseInt(partes[2], 10));
+                    } else { // dd-mm-yyyy
+                        fechaNativa = new Date(parseInt(partes[2], 10), parseInt(partes[1], 10) - 1, parseInt(partes[0], 10));
+                    }
+                }
             }
-
-            return new Date(anio, mes, dia);
+            
+            return isNaN(fechaNativa.getTime()) ? null : fechaNativa;
         }
-
 
         function filtrarSoloEstaSemana(lista) {
             if (!lista || !Array.isArray(lista)) return [];
