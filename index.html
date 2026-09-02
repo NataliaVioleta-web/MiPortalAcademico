@@ -197,26 +197,41 @@
                 return fechaEvaluar && fechaEvaluar >= fechaLunes && fechaEvaluar <= fechaDomingo;
             });
         }
-
-                // VERSIÓN DIRECTA AUTOMÁTICA SEMESTRAL: Muestra toda tu lista real sin filtros restrictivos
+        // VERSIÓN INTELIGENTE: Lee las columnas sin importar mayúsculas, minúsculas o espacios
         function generarBloquesHtml(lista, colorBorde = '#2c3e50', mostrarTodoElSemestre = false) {
             if (!lista || !Array.isArray(lista) || lista.length === 0) {
                 return '<div class="msg">No hay registros programados para este período.</div>';
             }
 
-            let listaProcesada = [...lista];
+            // 1. Limpiamos y estandarizamos las propiedades de cada fila para evitar vacíos
+            let listaProcesada = lista.map(item => {
+                let nuevoObj = {};
+                // Pasa todas las propiedades a minúsculas limpias
+                Object.keys(item).forEach(key => {
+                    nuevoObj[key.toLowerCase().trim()] = item[key];
+                });
+                return nuevoObj;
+            }).filter(item => {
+                let fechaTexto = String(item.fecha || '').trim();
+                let actTexto = String(item.actividad || item.ramo || '').trim();
+                return fechaTexto !== '' || actTexto !== '';
+            });
 
-            // Si es la vista extendida, ordenamos tus fechas cronológicamente de menor a mayor
+            if (listaProcesada.length === 0) {
+                return '<div class="msg">No hay actividades programadas.</div>';
+            }
+
+            // 2. Ordenar cronológicamente si es vista semestral
             if (mostrarTodoElSemestre) {
                 listaProcesada.sort((a, b) => {
                     let fA = interpretarFecha(a.fecha);
                     let fB = interpretarFecha(b.fecha);
-                    if (!fA || !fB) return 0;
+                    if (!fA) return 1;
+                    if (!fB) return -1;
                     return fA - fB;
                 });
             } else {
-                // Para el horario diario, usamos tu filtro de la semana actual
-                listaProcesada = filtrarSoloEstaSemana(lista);
+                listaProcesada = filtrarSoloEstaSemana(listaProcesada);
             }
 
             if (listaProcesada.length === 0) {
@@ -227,14 +242,14 @@
             let ultimoDiaRegistrado = '';
 
             listaProcesada.forEach(item => {
+                // Extractor tolerante multinombre
                 let fechaOriginal = item.fecha || '';
-                let hora = item.hora || '--:--';
-                let lugar = item.lugar || '';
-                let ramo = item.ramo || '';
-                let actividad = item.actividad || '';
-                let encargado = item.encargado || '';
+                let hora = item.hora || item.horario || '--:--';
+                let lugar = item.lugar || item.sala || '';
+                let ramo = item.ramo || item.asignatura || '';
+                let actividad = item.actividad || item.detalle || item.observaciones || '';
+                let encargado = item.encargado || item.docente || item.profesor || '';
 
-                // Formateamos la fecha visualmente para que se vea ordenada (ej: 10/9/2026)
                 let fObj = interpretarFecha(fechaOriginal);
                 let diaMostrar = fObj ? `${fObj.getDate()}/${fObj.getMonth()+1}/${fObj.getFullYear()}` : fechaOriginal;
 
@@ -244,15 +259,15 @@
                 }
 
                 html += `
-                    <div class="clase" style="border-left: 4px solid ${colorBorde};">
+                    <div class="clase" style="border-left: 4px solid ${colorBorde}; min-height: 70px; margin-bottom: 8px;">
                         <div style="flex: 1; padding-right: 15px;">
-                            <strong style="color: #2c3e50; font-size: 1.05em;">${ramo && ramo !== '-' ? ramo : 'Turno Clínico'}</strong>
-                            <div style="margin: 3px 0; font-weight: 500; color: #555; font-size:0.95em;">${actividad}</div>
+                            <strong style="color: #2c3e50; font-size: 1.05em;">${ramo ? ramo : (colorBorde === '#f1c40f' ? 'Turno Clínico' : 'Asignación')}</strong>
+                            <div style="margin: 4px 0; font-weight: 500; color: #444; font-size:0.95em;">${actividad ? actividad : 'Sin detalles'}</div>
                             <div class="info-secundaria">
-                                📍 <strong>Lugar:</strong> ${lugar} ${encargado ? `| 👤 <strong>Docente:</strong> ${encargado}` : ''}
+                                📍 <strong>Lugar:</strong> ${lugar ? lugar : 'Por definir'} ${encargado ? `| 👤 <strong>Docente:</strong> ${encargado}` : ''}
                             </div>
                         </div>
-                        <div class="bloque" style="background: ${colorBorde}; color: white;">${hora}</div>
+                        <div class="bloque" style="background: ${colorBorde}; color: ${colorBorde === '#f1c40f' ? '#2c3e50' : 'white'}; font-weight: bold;">${hora}</div>
                     </div>
                 `;
             });
