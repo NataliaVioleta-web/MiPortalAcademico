@@ -5,22 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Horario y Pruebas</title>
     <style>
-        .seccion-bloque {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-}
-.titulo-recuadro {
-    font-size: 1.2rem;
-    color: var(--primary);
-    margin-bottom: 15px;
-    padding-left: 10px;
-    border-left: 4px solid var(--primary);
-}
         :root {
             --primary: #2c3e50;
             --accent: #e74c3c;
+            --warning: #f1c40f;
             --bg: #f4f6f7;
             --card-bg: #ffffff;
             --text: #333333;
@@ -36,104 +24,83 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            padding-bottom: 60px;
+            padding-bottom: 40px;
         }
 
         header {
             background-color: var(--primary);
             color: white;
             text-align: center;
-            padding: 20px;
+            padding: 25px 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
         }
 
-        h1 { font-size: 1.5rem; margin-bottom: 5px; }
+        h1 { font-size: 1.6rem; margin-bottom: 6px; }
         h2 { font-size: 1rem; opacity: 0.9; font-weight: 400; }
 
-        /* Navegación Inferior */
-        nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-
-        nav button {
-            background: none;
-            border: none;
-            padding: 15px 0;
-            width: 100%;
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: #7f8c8d;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        nav button.activo {
-            color: var(--primary);
-            border-top: 3px solid var(--primary);
-            background: #f9f9f9;
-        }
-
-        /* Secciones de Página */
-        .seccion-pagina {
-            display: none;
-            padding: 20px;
-            max-width: 600px;
+        .contenedor-principal {
+            max-width: 650px;
             margin: 0 auto;
+            padding: 0 15px;
         }
 
-        .seccion-pagina.activa {
-            display: block;
+        .seccion-bloque {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            margin-bottom: 25px;
         }
 
-        /* Estilos de Tarjetas (Clases/Pruebas) */
+        .titulo-recuadro {
+            font-size: 1.25rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-left: 12px;
+            border-left: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+        }
+
         .dia {
             font-weight: bold;
-            margin: 20px 0 10px 0;
-            color: var(--primary);
-            font-size: 1.1rem;
-            border-bottom: 2px solid #bdc3c7;
-            padding-bottom: 5px;
+            margin: 15px 0 8px 0;
+            font-size: 1rem;
+            border-bottom: 1px solid #eaeded;
+            padding-bottom: 4px;
         }
 
         .clase {
-            background: var(--card-bg);
+            background: #fafbfc;
             border-radius: 8px;
-            margin-bottom: 10px;
-            padding: 15px;
+            margin-bottom: 8px;
+            padding: 12px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e5e8e8;
         }
 
         .info-secundaria {
             font-size: 0.85rem;
             color: #7f8c8d;
-            margin-top: 5px;
+            margin-top: 4px;
         }
 
         .bloque {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
             font-weight: bold;
             white-space: nowrap;
         }
 
         .msg {
             text-align: center;
-            padding: 4px;
+            padding: 15px;
             color: #7f8c8d;
             font-style: italic;
-            margin-top: 20px;
         }
     </style>
 </head>
@@ -144,165 +111,85 @@
         <h2 id="rango-semana">Calculando semana...</h2>
     </header>
 
-        <!-- PÁGINA INICIO (TODO UNIFICADO EN LA PRIMERA HOJA) -->
-    <main id="pag-inicio" class="seccion-pagina activa">
+    <div class="contenedor-principal">
         
-        <!-- SECCIÓN 1: HORARIO SEMANAL -->
         <div class="seccion-bloque">
-            <h3 class="titulo-recuadro">📅 Mi Horario Semanal</h3>
+            <h3 class="titulo-recuadro" style="border-left-color: var(--primary);">📅 Mi Horario Semanal</h3>
             <div id="contenedor-horario">
                 <div class="msg">Cargando horario... 🔄</div>
             </div>
         </div>
 
-        <!-- SECCIÓN 2: PRÓXIMAS PRUEBAS -->
-        <div class="seccion-bloque" style="margin-top: 25px;">
-            <h3 class="titulo-recuadro" style="border-left-color: #e74c3c;">📝 Próximas Pruebas</h3>
-            <div id="contenedor-pruebas-inicio">
+        <div class="seccion-bloque">
+            <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas</h3>
+            <div id="contenedor-pruebas">
                 <div class="msg">Cargando pruebas... 🔄</div>
             </div>
         </div>
 
-        <!-- SECCIÓN 3: TURNOS DE TOMA RADIOGRÁFICA -->
-        <div class="seccion-bloque" style="margin-top: 25px;">
-            <h3 class="titulo-recuadro" style="border-left-color: #f1c40f;">🦷 Turnos de Toma Radiográfica</h3>
+        <div class="seccion-bloque">
+            <h3 class="titulo-recuadro" style="border-left-color: var(--warning);">🦷 Turnos de Toma Radiográfica</h3>
             <div id="contenedor-turnos">
                 <div class="msg">Cargando turnos... 🔄</div>
             </div>
         </div>
 
-    </main>
-
-    <!-- PÁGINA DOCUMENTOS (Por si la usas luego, la dejamos oculta abajo) -->
-    <main id="pag-documentos" class="seccion-pagina">
-        <div class="msg">Sección de respaldo o apuntes.</div>
-    </main>
-
-    <!-- MENÚ DE NAVEGACIÓN -->
-    <nav>
-        <button id="btn-inicio" class="activo" onclick="cambiarPagina('inicio')">📅 Horario</button>
-        <button id="btn-documentos" onclick="cambiarPagina('documentos')">📝 Pruebas</button>
-    </nav>
-
+    </div>
     <script>
-        // ⚠️ REEMPLAZA ESTA URL CON TU ENLACE CORRECTO DE GOOGLE APPS SCRIPT (DEBE TERMINAR EN /exec)
-        const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzKDrjUcyywiO1WoXtSyhRFevr6lvCkQ1suX374i7kDbs0uu90eCY0efqBPWe_gx932rQ/exec';
+        const URL_SCRIPT = 'https://google.com';
 
-        // Cambiar entre pestañas
-        function cambiarPagina(pagina) {
-            document.querySelectorAll('.seccion-pagina').forEach(p => p.classList.remove('activa'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('activo'));
+        let fechaLunes, fechaDomingo;
 
-            if (pagina === 'inicio') {
-                document.getElementById('pag-inicio').classList.add('activa');
-                document.getElementById('btn-inicio').classList.add('activo');
-            }
-            if (pagina === 'documentos') {
-                document.getElementById('pag-documentos').classList.add('activa');
-                document.getElementById('btn-documentos').classList.add('activo');
-            }
-        }
-
-        // Calcular rango de la semana actual
         function calcularFechasSemana() {
             const subtituloSemana = document.getElementById('rango-semana');
-            if (!subtituloSemana) return;
             const hoy = new Date();
             const diaSemana = hoy.getDay(); 
             const diferenciaLunes = (diaSemana === 0) ? -6 : 1 - diaSemana;
-            const lunes = new Date(hoy);
-            lunes.setDate(hoy.getDate() + diferenciaLunes);
-            const viernes = new Date(lunes);
-            viernes.setDate(lunes.getDate() + 4);
-            subtituloSemana.innerText = `Semana del ${lunes.getDate()}/${lunes.getMonth()+1} al ${viernes.getDate()}/${viernes.getMonth()+1}`;
+            
+            fechaLunes = new Date(hoy);
+            fechaLunes.setDate(hoy.getDate() + diferenciaLunes);
+            fechaLunes.setHours(0,0,0,0);
+
+            fechaDomingo = new Date(fechaLunes);
+            fechaDomingo.setDate(fechaLunes.getDate() + 6);
+            fechaDomingo.setHours(23,59,59,999);
+
+            subtituloSemana.innerText = `Semana del ${fechaLunes.getDate()}/${fechaLunes.getMonth()+1} al ${fechaDomingo.getDate()}/${fechaDomingo.getMonth()+1}`;
         }
 
-        // Renderizar el HTML dinámicamente basándose en la lista de Sheets
-        function generarBloquesHtml(lista) {
-            if (!lista || lista.length === 0) return '<div class="msg">No hay registros disponibles.</div>';
-            
-            let html = '';
-            let ultimoDiaRegistrado = '';
+        function interpretarFecha(textoFecha) {
+            if (!textoFecha || typeof textoFecha !== 'string') return null;
+            const partes = textoFecha.trim().split('/');
+            if (partes.length !== 3) return null;
+            return new Date(partes[2], partes[1] - 1, partes[0]);
+        }
 
-            lista.forEach(item => {
-                let fechaOriginal = item.fecha || '';
-                let hora = item.hora || '--:--';
-                let lugar = item.lugar || '';
-                let ramo = item.ramo || 'Actividad';
-                let actividad = item.actividad || '';
-                let encargado = item.encargado || '';
+        function filtrarSoloEstaSemana(lista) {
+            if (!lista || !Array.isArray(lista)) return [];
+            let ultimoDiaValido = null;
 
-                if (fechaOriginal.trim() !== '') {
-                    ultimoDiaRegistrado = fechaOriginal;
+            return lista.filter(item => {
+                let fechaTexto = (item.fecha || '').trim();
+                
+                if (fechaTexto !== '') {
+                    ultimoDiaValido = fechaTexto;
                 }
                 
-                let diaMostrar = ultimoDiaRegistrado || 'Sin Fecha';
+                let fechaEvaluar = interpretarFecha(fechaTexto !== '' ? fechaTexto : ultimoDiaValido);
+                if (!fechaEvaluar) return false;
 
-                if (!ramo && !actividad) return;
-
-                if (fechaOriginal.trim() !== '' && html.indexOf(`<div class="dia">📅 ${diaMostrar}</div>`) === -1) {
-                    html += `<div class="dia">📅 ${diaMostrar}</div>`;
-                } else if (fechaOriginal.trim() === '' && html === '') {
-                    html += `<div class="dia">📅 ${diaMostrar}</div>`;
-                }
-
-                html += `
-                    <div class="clase" style="border-left: 4px solid var(--primary); padding-left: 15px; margin-bottom: 8px;">
-                        <div style="flex: 1; padding-right: 15px;">
-                            <strong style="color: var(--primary); font-size: 1.05em;">${ramo}</strong>
-                            <div style="margin: 4px 0; font-weight: 500; color: #333;">${actividad}</div>
-                            <div class="info-secundaria">
-                                📍 <strong>Lugar:</strong> ${lugar} | 👤 <strong>Docente:</strong> ${encargado}
-                            </div>
-                        </div>
-                        <div class="bloque" style="background: #2c3e50; color: white;">${hora}</div>
-                    </div>
-                `;
+                return fechaEvaluar >= fechaLunes && fechaEvaluar <= fechaDomingo;
             });
-
-            return html || '<div class="msg">No hay registros disponibles.</div>';
         }
 
-        // Conexión con la API de Google Sheets
-               // Conexión con la API de Google Sheets adaptada a tus 3 pestañas
-               // Conexión con la API y distribución en la primera hoja
-        async function cargarDatosDesdeSheets() {
-            const contenedorHorario = document.getElementById('contenedor-horario');
-            const contenedorPruebas = document.getElementById('contenedor-pruebas-inicio');
-            const contenedorTurnos = document.getElementById('contenedor-turnos');
-
-            try {
-                const respuesta = await fetch(URL_SCRIPT);
-                if (!respuesta.ok) throw new Error("Error en respuesta de red");
-                
-                const datos = await respuesta.json();
-
-                // 1. Renderizar Horario Semanal (Pestaña 'clases')
-                contenedorHorario.innerHTML = generarBloquesHtml(datos.clases);
-                
-                // 2. Renderizar Próximas Pruebas (Pestaña 'pruebas')
-                contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas, '#e74c3c');
-
-                // 3. Renderizar Turnos Radiográficos (Pestaña 'turnos')
-                contenedorTurnos.innerHTML = generarTurnosHtml(datos.turnos);
-
-            } catch (error) {
-                console.error("Error al obtener datos:", error);
-                const msgError = '<div class="msg" style="color: red;">⚠️ Error al cargar este recuadro.</div>';
-                contenedorHorario.innerHTML = msgError;
-                contenedorPruebas.innerHTML = msgError;
-                contenedorTurnos.innerHTML = msgError;
-            }
-        }
-
-        // Modificamos ligeramente tu función original para aceptar colores personalizados por sección
         function generarBloquesHtml(lista, colorBorde = '#2c3e50') {
-            if (!lista || lista.length === 0) return '<div class="msg">No hay registros para esta semana.</div>';
+            const listaFiltrada = filtrarSoloEstaSemana(lista);
+            if (listaFiltrada.length === 0) return '<div class="msg">No hay registros programados para esta semana.</div>';
             
             let html = '';
             let ultimoDiaRegistrado = '';
 
-            lista.forEach(item => {
+            listaFiltrada.forEach(item => {
                 let fechaOriginal = item.fecha || '';
                 let hora = item.hora || '--:--';
                 let lugar = item.lugar || '';
@@ -315,17 +202,17 @@
 
                 if (!ramo && !actividad) return;
 
-                if (fechaOriginal.trim() !== '' && html.indexOf(`<div class="dia">📅 ${diaMostrar}</div>`) === -1) {
-                    html += `<div class="dia" style="color: ${colorBorde}; border-bottom-color: ${colorBorde}33;">📅 ${diaMostrar}</div>`;
+                if (fechaOriginal.trim() !== '' && html.indexOf(`style="color: ${colorBorde};">📅 ${diaMostrar}</div>`) === -1) {
+                    html += `<div class="dia" style="color: ${colorBorde};">📅 ${diaMostrar}</div>`;
                 }
 
                 html += `
-                    <div class="clase" style="border-left: 4px solid ${colorBorde}; padding-left: 15px; margin-bottom: 8px;">
+                    <div class="clase" style="border-left: 4px solid ${colorBorde};">
                         <div style="flex: 1; padding-right: 15px;">
                             <strong style="color: #2c3e50; font-size: 1.05em;">${ramo}</strong>
-                            <div style="margin: 4px 0; font-weight: 500; color: #555;">${actividad}</div>
+                            <div style="margin: 3px 0; font-weight: 500; color: #555; font-size:0.95em;">${actividad}</div>
                             <div class="info-secundaria">
-                                📍 <strong>Lugar:</strong> ${lugar} | 👤 <strong>Docente:</strong> ${encargado}
+                                📍 <strong>Lugar:</strong> ${lugar} ${encargado ? `| 👤 <strong>Docente:</strong> ${encargado}` : ''}
                             </div>
                         </div>
                         <div class="bloque" style="background: ${colorBorde}; color: white;">${hora}</div>
@@ -336,13 +223,12 @@
             return html;
         }
 
-        // Nueva función exclusiva para diseñar visualmente tus turnos radiográficos
         function generarTurnosHtml(lista) {
-            if (!lista || lista.length === 0) return '<div class="msg">No tienes turnos radiográficos asignados.</div>';
+            const listaFiltrada = filtrarSoloEstaSemana(lista);
+            if (listaFiltrada.length === 0) return '<div class="msg">No tienes turnos radiográficos asignados esta semana.</div>';
             
             let html = '';
-            lista.forEach(item => {
-                // Mapea los nombres de tus columnas de la pestaña 'turnos'
+            listaFiltrada.forEach(item => {
                 let fecha = item.fecha || 'Sin fecha';
                 let hora = item.hora || 'Todo el día';
                 let grupo = item.grupo || item.equipo || '';
@@ -350,10 +236,10 @@
                 let detalles = item.detalles || item.observaciones || '';
 
                 html += `
-                    <div class="clase" style="border-left: 4px solid #f1c40f; padding-left: 15px; margin-bottom: 8px; background: #fdfefe;">
+                    <div class="clase" style="border-left: 4px solid var(--warning);">
                         <div style="flex: 1;">
-                            <span style="font-size: 0.85rem; font-weight: bold; color: #f39c12; background: #fef9e7; padding: 2px 8px; border-radius: 4px;">📅 ${fecha} (${hora})</span>
-                            <div style="margin: 6px 0 2px 0; font-weight: 600; color: #2c3e50;">${clinica}</div>
+                            <span style="font-size: 0.8rem; font-weight: bold; color: #d35400; background: #fef9e7; padding: 2px 8px; border-radius: 4px;">📅 ${fecha} (${hora})</span>
+                            <div style="margin: 5px 0 2px 0; font-weight: 600; color: #2c3e50;">${clinica}</div>
                             <div class="info-secundaria">
                                 👥 <strong>Asignación:</strong> ${grupo} ${detalles ? `| 📝 ${detalles}` : ''}
                             </div>
@@ -364,8 +250,30 @@
             return html;
         }
 
+        async function cargarDatosDesdeSheets() {
+            const contenedorHorario = document.getElementById('contenedor-horario');
+            const contenedorPruebas = document.getElementById('contenedor-pruebas');
+            const contenedorTurnos = document.getElementById('contenedor-turnos');
 
-        // Arrancar la app al cargar el documento
+            try {
+                const respuesta = await fetch(URL_SCRIPT);
+                if (!respuesta.ok) throw new Error("Error de red");
+                
+                const datos = await respuesta.json();
+
+                contenedorHorario.innerHTML = generarBloquesHtml(datos.clases, '#2c3e50');
+                contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas, '#e74c3c');
+                contenedorTurnos.innerHTML = generarTurnosHtml(datos.turnos);
+
+            } catch (error) {
+                console.error("Error:", error);
+                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar.</div>';
+                contenedorHorario.innerHTML = msgError;
+                contenedorPruebas.innerHTML = msgError;
+                contenedorTurnos.innerHTML = msgError;
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             calcularFechasSemana();
             cargarDatosDesdeSheets();
