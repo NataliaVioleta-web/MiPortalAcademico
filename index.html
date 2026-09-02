@@ -167,7 +167,7 @@
             </div>
 
             <div class="seccion-bloque">
-                <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas (Mes)</h3>
+                <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas</h3>
                 <div id="contenedor-pruebas">
                     <div class="msg">Cargando pruebas... </div>
                 </div>
@@ -326,8 +326,9 @@
                 let fObj = interpretarFecha(item.fecha);
                 let diaMostrar = fObj ? `${fObj.getDate()}/${fObj.getMonth()+1}/${fObj.getFullYear()}` : item.fecha;
 
+                               // CORREGIDO: Forzamos a que el texto de la fecha sea siempre azul
                 if (diaMostrar !== ultimoDiaRegistrado) {
-                    html += `<div class="dia" style="color: ${2c3e50};">📅 ${diaMostrar}</div>`;
+                    html += `<div class="dia" style="color: #2c3e50;">📅 ${diaMostrar}</div>`;
                     ultimoDiaRegistrado = diaMostrar;
                 }
 
