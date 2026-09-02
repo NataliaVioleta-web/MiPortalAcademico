@@ -224,7 +224,7 @@
             });
         }
 
-        function generarBloquesHtml(lista, colorBorde = '#2c3e50', usarTresSemanas = false) {
+                function generarBloquesHtml(lista, colorBorde = '#2c3e50', usarTresSemanas = false) {
             const listaFiltrada = usarTresSemanas ? filtrarTresSemanas(lista) : filtrarSoloEstaSemana(lista);
             if (listaFiltrada.length === 0) return '<div class="msg">No hay registros programados.</div>';
             
@@ -236,8 +236,8 @@
                 let hora = item.hora || '--:--';
                 let lugar = item.lugar || '';
                 let ramo = item.ramo || 'Actividad';
-                let actividad = item.actividad || '';
-                let encargado = item.encargado || '';
+                let actividad = item.actividad || item.detalle || '';
+                let encargado = item.encargado || item.docente || item.profesor || '';
 
                 if (fechaOriginal.trim() !== '') ultimoDiaRegistrado = fechaOriginal;
                 let diaMostrar = ultimoDiaRegistrado || 'Sin Fecha';
@@ -248,6 +248,7 @@
                     html += `<div class="dia" style="color: ${colorBorde};">📅 ${diaMostrar}</div>`;
                 }
 
+                // Corregido: Se asegura de pintar correctamente la actividad y el docente encargado
                 html += `
                     <div class="clase" style="border-left: 4px solid ${colorBorde};">
                         <div style="flex: 1; padding-right: 15px;">
@@ -264,6 +265,7 @@
 
             return html;
         }
+
 
         function generarTurnosHtml(lista) {
             const listaFiltrada = filtrarTresSemanas(lista);
