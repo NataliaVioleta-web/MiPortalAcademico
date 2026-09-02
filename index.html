@@ -158,31 +158,39 @@
             subtituloSemana.innerText = `Semana del ${fechaLunes.getDate()}/${fechaLunes.getMonth()+1} al ${fechaDomingo.getDate()}/${fechaDomingo.getMonth()+1}`;
         }
 
-        // Lector universal ultra-corregido matemático para procesar de forma nativa YYYY/MM/DD o YYYY-MM-DD
+                      // VERSIÓN CORREGIDA: Diseñada exclusivamente para tu formato aaaa-mm-dd de Sheets
         function interpretarFecha(textoFecha) {
             if (!textoFecha) return null;
             let stringFecha = String(textoFecha).trim();
             
+            // Si viene con el texto de la hora de Google, lo limpiamos
             if (stringFecha.includes('T')) {
                 stringFecha = stringFecha.split('T')[0];
             }
             
+            // Cambiamos barras por guiones por si acaso
             stringFecha = stringFecha.replace(/\//g, '-');
             const partes = stringFecha.split('-');
             
             if (partes.length !== 3) return null;
 
+            // Para formato aaaa-mm-dd:
+            // partes[0] es el Año (4 dígitos)
+            // partes[1] es el Mes (01-12)
+            // partes[2] es el Día (01-31)
             let anio = parseInt(partes[0], 10);
-            let mes = parseInt(partes[1], 10) - 1;
+            let mes = parseInt(partes[1], 10) - 1; // En JavaScript los meses van de 0 a 11
             let dia = parseInt(partes[2], 10);
 
-            if (anio < 1000) { // Resguardo por si viene como dd-mm-yyyy
+            // Resguardo por si alguna celda viniera al revés (dd-mm-aaaa)
+            if (anio < 1000) {
                 dia = parseInt(partes[0], 10);
                 mes = parseInt(partes[1], 10) - 1;
                 anio = parseInt(partes[2], 10);
             }
 
-            return new Date(anio, mes, dia);
+            const fechaResultado = new Date(anio, mes, dia);
+            return isNaN(fechaResultado.getTime()) ? null : fechaResultado;
         }
 
         function filtrarSoloEstaSemana(lista) {
