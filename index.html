@@ -214,32 +214,36 @@
             return filasEstandarizadas;
         }
 
-        function generarBloquesHtml(lista, colorBorde = '#2c3e50', mostrarTodoElSemestre = false) {
+                function generarBloquesHtml(lista, colorBorde = '#2c3e50', mostrarTodoElSemestre = false) {
             let listaLimpia = normalizarLista(lista);
             if (listaLimpia.length === 0) return '<div class="msg">No hay registros en tu Google Sheets.</div>';
 
             const hoy = new Date();
             hoy.setHours(0,0,0,0);
 
+            // CORREGIDO: Calculamos exactamente el límite de 1 mes (30 días en el futuro)
+            const unMesDespues = new Date(hoy);
+            unMesDespues.setDate(hoy.getDate() + 30);
+            unMesDespues.setHours(23,59,59,999);
+
             if (mostrarTodoElSemestre) {
-                // Para Pruebas y Turnos: filtra lo antiguo y ordena cronológicamente hacia adelante
+                // Filtra para que aparezcan SOLO los eventos entre hoy y dentro de 30 días exactos
                 listaLimpia = listaLimpia.filter(item => {
                     let f = interpretarFecha(item.fecha);
-                    return f && f >= hoy;
+                    return f && f >= hoy && f <= unMesDespues;
                 }).sort((a, b) => interpretarFecha(a.fecha) - interpretarFecha(b.fecha));
             } else {
-                // Para el Horario: Filtra estrictamente las clases de esta semana en curso
+                // Para el Horario: Filtra las clases de esta semana en curso
                 let listaSemanal = listaLimpia.filter(item => {
                     let f = interpretarFecha(item.fecha);
                     return f && f >= fechaLunes && f <= fechaDomingo;
                 });
 
-                // TRUCO INTELIGENTE: Si tu horario de esta semana está vacío (porque es septiembre y tus clases son de agosto),
-                // te muestra de forma automática todas tus clases futuras del semestre para que no se vea en blanco.
+                // Si tu horario de esta semana está vacío, muestra de forma automática lo que viene en el mes
                 if (listaSemanal.length === 0) {
                     listaLimpia = listaLimpia.filter(item => {
                         let f = interpretarFecha(item.fecha);
-                        return f && f >= hoy;
+                        return f && f >= hoy && f <= unMesDespues;
                     }).sort((a, b) => interpretarFecha(a.fecha) - interpretarFecha(b.fecha));
                 } else {
                     listaLimpia = listaSemanal;
@@ -247,7 +251,7 @@
             }
 
             if (listaLimpia.length === 0) {
-                return '<div class="msg">No hay próximas actividades programadas en este bloque.</div>';
+                return '<div class="msg">No hay próximas actividades programadas para este mes.</div>';
             }
 
             let html = '';
@@ -278,6 +282,7 @@
 
             return html;
         }
+
 
         async function cargarDatosDesdeSheets() {
             const contenedorHorario = document.getElementById('contenedor-horario');
