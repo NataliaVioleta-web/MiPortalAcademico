@@ -205,13 +205,28 @@
             background: white;
         }
 
+              /* DISEÑO RESPONSIVO: Se activa automáticamente en las pantallas de celulares */
         @media (max-width: 768px) {
-            body { padding-bottom: 60px; }
-            .contenedor-principal { grid-template-columns: 1fr; gap: 0; }
+            body { 
+                padding-bottom: 60px; 
+            }
+            .grid-dos-columnas { 
+                grid-template-columns: 1fr; 
+                gap: 0;
+                display: flex;
+                flex-direction: column; /* Transforma la cuadrícula en una lista vertical */
+            }
             .nav-superior { display: none; }
             .nav-inferior { display: flex; }
-            .iframe-contenedor { height: calc(100vh - 140px); }
+            .iframe-contenedor { height: 60vh; }
+
+            /* REORDENAMIENTO EXCLUSIVO PARA CELULARES */
+            .bloque-horario  { order: 1; } /* 1. Horario arriba */
+            .bloque-pruebas  { order: 2; } /* 2. Pruebas abajo del horario */
+            .bloque-turnos   { order: 3; } /* 3. Turnos clínicos después */
+            .bloque-accesos  { order: 4; } /* 4. Botones de accesos al final de todo */
         }
+
     </style>
 </head>
 <body>
@@ -230,36 +245,44 @@
         </div>
     </header>
 
-    <!-- PÁGINA 1: PORTAL ACADÉMICO PRINCIPAL -->
-    <main id="pag-inicio" class="pagina-seccion activa">
-        <div class="contenedor-principal">
-            
-            <div class="columna-izquierda">
-                <div class="seccion-bloque">
+            <!-- PÁGINA 1: TU HORARIO, PRUEBAS Y TURNOS (Optimizada para orden dinámico) -->
+        <div id="pag-inicio" class="pagina-seccion activa">
+            <div class="grid-dos-columnas">
+                
+                <!-- BLOQUE A: Horario Semanal -->
+                <div class="seccion-bloque bloque-horario">
                     <h3 class="titulo-recuadro" style="border-left-color: var(--primary);">📅 Mi Horario Semanal</h3>
-                    <div id="contenedor-horario"><div class="msg">Cargando horario... 🔄</div></div>
+                    <div id="contenedor-horario">
+                        <div class="msg">Cargando horario... 🔄</div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="columna-derecha">
-                <div class="seccion-bloque" style="background: #eaf2f8; border: 1px solid #d4e6f1;">
+                <!-- BLOQUE B: Accesos Directos U -->
+                <div class="seccion-bloque bloque-accesos" style="background: #eaf2f8; border: 1px solid #d4e6f1;">
                     <h3 class="titulo-recuadro" style="border-left-color: #2980b9; color: #2980b9;">🔗 Accesos Directos</h3>
                     <a href="https://universidad.cl" target="_blank" class="btn-enlace" style="background: #2980b9;">🌐 Portal Alumno</a>
                     <a href="https://universidad.cl" target="_blank" class="btn-enlace" style="background: #27ae60;">📚 Aula Virtual</a>
                 </div>
 
-                <div class="seccion-bloque">
+                <!-- BLOQUE C: Próximas Pruebas (Mes) -->
+                <div class="seccion-bloque bloque-pruebas">
                     <h3 class="titulo-recuadro" style="border-left-color: var(--accent);">📝 Próximas Pruebas (Mes)</h3>
-                    <div id="contenedor-pruebas"><div class="msg">Cargando pruebas... 🔄</div></div>
+                    <div id="contenedor-pruebas">
+                        <div class="msg">Cargando pruebas... 🔄</div>
+                    </div>
                 </div>
 
-                <div class="seccion-bloque">
+                <!-- BLOQUE D: Turnos Radiográficos -->
+                <div class="seccion-bloque bloque-turnos">
                     <h3 class="titulo-recuadro" style="border-left-color: var(--warning);">🦷 Turnos de Toma Radiográfica</h3>
-                    <div id="contenedor-turnos"><div class="msg">Cargando turnos... 🔄</div></div>
+                    <div id="contenedor-turnos">
+                        <div class="msg">Cargando turnos... 🔄</div>
+                    </div>
                 </div>
-            </div>
 
+            </div>
         </div>
+
     </main>
 
            <!-- PÁGINA 2: PLANIFICACIÓN (VENTANA + BOTÓN INFERIOR MEDIANO) -->
