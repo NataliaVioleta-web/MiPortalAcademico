@@ -211,12 +211,12 @@
                 padding-bottom: 60px; 
             }
             
-            /* Cambia a lista vertical SOLO en teléfonos */
-            .grid-dos-columnas { 
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 0;
-            }
+                    /* Diseño de dos columnas principales para Computadoras */
+        .grid-dos-columnas {
+            display: grid;
+            grid-template-columns: 1.8fr 1.2fr;
+            gap: 20px;
+        }
             
             .nav-superior { display: none; }
             .nav-inferior { display: flex; }
