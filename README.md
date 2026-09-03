@@ -1,1 +1,1 @@
-# mi-horario
+# MiPortalAcadémico
