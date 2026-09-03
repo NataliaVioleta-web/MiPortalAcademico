@@ -205,17 +205,19 @@
             background: white;
         }
 
-              /* DISEÑO RESPONSIVO: Se activa automáticamente en las pantallas de celulares */
+              /* DISEÑO RESPONSIVO: Se activa EXCLUSIVAMENTE en las pantallas de celulares */
         @media (max-width: 768px) {
             body { 
                 padding-bottom: 60px; 
             }
+            
+            /* Cambia a lista vertical SOLO en teléfonos */
             .grid-dos-columnas { 
-                grid-template-columns: 1fr; 
+                display: flex !important;
+                flex-direction: column !important;
                 gap: 0;
-                display: flex;
-                flex-direction: column; /* Transforma la cuadrícula en una lista vertical */
             }
+            
             .nav-superior { display: none; }
             .nav-inferior { display: flex; }
             .iframe-contenedor { height: 60vh; }
@@ -226,6 +228,7 @@
             .bloque-turnos   { order: 3; } /* 3. Turnos clínicos después */
             .bloque-accesos  { order: 4; } /* 4. Botones de accesos al final de todo */
         }
+
 
     </style>
 </head>
