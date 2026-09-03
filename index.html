@@ -361,38 +361,40 @@
             return filasEstandarizadas;
         }
 
-        function generarBloquesHtml(lista, colorBorde = '#2c3e50', mostrarUnMes = false) {
+                function generarBloquesHtml(lista, colorBorde = '#2c3e50', mostrarVistaMensual = false) {
             let listaLimpia = normalizarLista(lista);
-            if (listaLimpia.length === 0) return '<div class="msg">No hay registros programados.</div>';
+            if (listaLimpia.length === 0) return '<div class="msg">No hay registros en tu Google Sheets.</div>';
 
             const hoy = new Date();
             hoy.setHours(0,0,0,0);
 
+            // Calculamos exactamente el límite de 1 mes (30 días en el futuro a partir de hoy)
             const unMesDespues = new Date(hoy);
             unMesDespues.setDate(hoy.getDate() + 30);
+            unMesDespues.setHours(23,59,59,999);
 
-            if (mostrarUnMes) {
+            if (mostrarVistaMensual) {
+                // VISTA MENSUAL (Para Pruebas y Turnos): Muestra lo que viene entre hoy y los próximos 30 días
                 listaLimpia = listaLimpia.filter(item => {
                     let f = interpretarFecha(item.fecha);
                     return f && f >= hoy && f <= unMesDespues;
                 }).sort((a, b) => interpretarFecha(a.fecha) - interpretarFecha(b.fecha));
             } else {
-                let listaSemanal = listaLimpia.filter(item => {
+                // VISTA SEMANAL (Para Horario): Filtra estrictamente las clases de la semana en curso
+                listaLimpia = listaLimpia.filter(item => {
                     let f = interpretarFecha(item.fecha);
                     return f && f >= fechaLunes && f <= fechaDomingo;
                 });
-
-                if (listaSemanal.length === 0) {
-                    listaLimpia = listaLimpia.filter(item => {
-                        let f = interpretarFecha(item.fecha);
-                        return f && f >= hoy && f <= unMesDespues;
-                    }).sort((a, b) => interpretarFecha(a.fecha) - interpretarFecha(b.fecha));
-                } else {
-                    listaLimpia = listaSemanal;
-                }
             }
 
-            if (listaLimpia.length === 0) return '<div class="msg">No hay actividades programadas para este mes.</div>';
+            // Mensajes personalizados si el filtro deja el bloque vacío
+            if (listaLimpia.length === 0) {
+                if (mostrarVistaMensual) {
+                    return '<div class="msg">No hay actividades programadas para este mes.</div>';
+                } else {
+                    return '<div class="msg">📅 No tienes clases programadas para esta semana actual de septiembre.</div>';
+                }
+            }
 
             let html = '';
             let ultimoDiaRegistrado = '';
@@ -410,7 +412,7 @@
                     <div class="clase" style="border-left: 4px solid ${colorBorde}; margin-bottom: 8px;">
                         <div style="flex: 1; padding-right: 15px;">
                             <strong style="color: #2c3e50; font-size: 1.05em;">${item.ramo ? item.ramo : (colorBorde === '#f1c40f' ? 'Turno Clínico' : 'Asignación')}</strong>
-                            <div style="margin: 3px 0; font-weight: 500; color: #555; font-size:0.95em;">${item.actividad}</div>
+                            <div style="margin: 3px 0; font-weight: 500; color: #444; font-size:0.95em;">${item.actividad}</div>
                             <div class="info-secundaria">
                                 📍 <strong>Lugar:</strong> ${item.lugar} ${item.encargado ? `| 👤 <strong>Docente:</strong> ${item.encargado}` : ''}
                             </div>
@@ -419,6 +421,7 @@
                     </div>
                 `;
             });
+
             return html;
         }
 
@@ -433,13 +436,18 @@
                 
                 const datos = await respuesta.json();
 
+                // 1. Horario Semanal: Filtrado estricto por semana (false)
                 contenedorHorario.innerHTML = generarBloquesHtml(datos.clases, '#2c3e50', false);
+                
+                // 2. Pruebas: Rango de 1 mes completo hacia adelante (true)
                 contenedorPruebas.innerHTML = generarBloquesHtml(datos.pruebas, '#e74c3c', true);
+                
+                // 3. Turnos: Rango de 1 mes completo hacia adelante (true)
                 contenedorTurnos.innerHTML = generarBloquesHtml(datos.turnos, '#f1c40f', true);
 
             } catch (error) {
                 console.error("Error:", error);
-                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar.</div>';
+                const msgError = '<div class="msg" style="color: red;">⚠️ Error al sincronizar con Google Sheets.</div>';
                 contenedorHorario.innerHTML = msgError;
                 contenedorPruebas.innerHTML = msgError;
                 contenedorTurnos.innerHTML = msgError;
